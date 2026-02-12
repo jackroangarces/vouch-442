@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getAuthErrorMessage } from "../../utils/authErrors";
 
+// Sign Up Page
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

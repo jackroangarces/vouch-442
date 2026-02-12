@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import AccountSettings from "../../components/AccountSettings";
 
+// Profile Page
 export default function Profile() {
   const { user } = useAuth();
   const [showSettings, setShowSettings] = useState(false);

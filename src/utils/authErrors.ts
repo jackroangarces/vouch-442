@@ -1,6 +1,4 @@
-/**
- * Map Firebase Auth error codes to user-friendly messages.
- */
+// Map Firebase Auth error codes to user-friendly messages
 export function getAuthErrorMessage(err: unknown, context: "login" | "signup"): string {
   const code = err && typeof err === "object" && "code" in err ? (err as { code: string }).code : null;
 

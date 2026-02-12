@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import viteLogo from "/assets/logos/vite.svg";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <nav className="navbar">
@@ -15,8 +17,13 @@ export function Navbar() {
           <span className="navbar-user">…</span>
         ) : user ? (
           <div className="navbar-user">
-            <span>{user.email}</span>
-            <button type="button" className="navbar-logout" onClick={() => logout()}>
+            <button type="button" className="navbar-profile" onClick={() => navigate("/profile")}>
+              {user.displayName}
+            </button>
+            <button type="button" className="navbar-logout" onClick={async () => {
+              await logout();
+              if (location.pathname === "/profile") navigate("/");
+            }}>
               Log out
             </button>
           </div>

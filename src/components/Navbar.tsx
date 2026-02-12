@@ -1,14 +1,31 @@
-import viteLogo from '/assets/logos/vite.svg'
+import { Link } from "react-router-dom";
+import viteLogo from "/assets/logos/vite.svg";
+import { useAuth } from "../contexts/AuthContext";
 
 export function Navbar() {
+  const { user, loading, logout } = useAuth();
+
   return (
     <nav className="navbar">
-      <a href="/" className="navbar-logo">
+      <Link to="/" className="navbar-logo">
         <img src={viteLogo} alt="Logo" />
-      </a>
-      <button type="button" className="navbar-login">
-        Login
-      </button>
+      </Link>
+      <div className="navbar-right">
+        {loading ? (
+          <span className="navbar-user">…</span>
+        ) : user ? (
+          <div className="navbar-user">
+            <span>{user.email}</span>
+            <button type="button" className="navbar-logout" onClick={() => logout()}>
+              Log out
+            </button>
+          </div>
+        ) : (
+          <Link to="/login" className="navbar-login">
+            Login
+          </Link>
+        )}
+      </div>
     </nav>
-  )
+  );
 }

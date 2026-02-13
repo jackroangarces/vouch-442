@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import viteLogo from "/assets/logos/vite.svg";
+import VouchLogo from "/assets/logos/VouchLogo.png";
 import { useAuth } from "../contexts/AuthContext";
 
 export function Navbar() {
@@ -10,7 +10,7 @@ export function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-logo">
-        <img src={viteLogo} alt="Logo" />
+          <img src={VouchLogo} alt="Logo"/>
       </Link>
       <div className="navbar-right">
         {loading ? (

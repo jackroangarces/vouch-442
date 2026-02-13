@@ -42,7 +42,9 @@ body {
 }
 
 .navbar-logo img {
-  height: 2rem;
+  width: 50%;
+  max-width: 1000px;
+  height: 50%;
   display: block;
 }
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useUserProfile } from "../contexts/UserProfileContext";
 
 type Props = {
   onClose: () => void;
@@ -8,7 +9,10 @@ type Props = {
 
 export default function AccountSettings({ onClose }: Props) {
   const { user, updateUsername, changePassword, deleteAccount } = useAuth();
+  const { isBusiness, upgradeToBusiness } = useUserProfile();
   const navigate = useNavigate();
+
+  const [upgrading, setUpgrading] = useState(false);
 
   const [username, setUsername] = useState(user?.displayName ?? "");
   const [oldPassword, setOldPassword] = useState("");
@@ -64,6 +68,18 @@ export default function AccountSettings({ onClose }: Props) {
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleUpgradeToBusiness() {
+    setUpgrading(true);
+    try {
+      await upgradeToBusiness();
+      onClose();
+    } catch {
+      setError("Failed to switch to business account");
+    } finally {
+      setUpgrading(false);
     }
   }
 
@@ -134,6 +150,23 @@ export default function AccountSettings({ onClose }: Props) {
               placeholder="Leave blank to keep current"
             />
           </label>
+
+          {!isBusiness && (
+            <>
+              <hr className="modal-divider" />
+              <div className="modal-section">
+                <p className="modal-section-label">Account type</p>
+                <button
+                  type="button"
+                  className="business-upgrade-btn"
+                  onClick={handleUpgradeToBusiness}
+                  disabled={upgrading}
+                >
+                  {upgrading ? "Switching…" : "Switch to business account"}
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="modal-footer">

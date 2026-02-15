@@ -75,6 +75,40 @@ body {
   padding: 2rem;
 }
 
+.home-dummy-link {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.6em 1.25em;
+  background-color: #646cff;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.25s;
+}
+
+.home-dummy-link:hover {
+  background-color: #535bf2;
+  color: #fff;
+}
+
+.restaurant-review-btn {
+  margin-top: 1rem;
+  padding: 0.6em 1.25em;
+  background-color: #646cff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.25s;
+}
+
+.restaurant-review-btn:hover {
+  background-color: #535bf2;
+}
+
 /* Auth Pages */
 .auth-card {
   max-width: 360px;
@@ -252,6 +286,25 @@ button:focus-visible {
   background-color: #535bf2;
 }
 
+.profile-business-dashboard-btn {
+  display: inline-block;
+  padding: 0.6em 1.5em;
+  background-color: transparent;
+  color: #646cff;
+  border: 1px solid #646cff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.25s, color 0.25s;
+}
+
+.profile-business-dashboard-btn:hover {
+  background-color: #646cff;
+  color: #fff;
+}
+
 .profile-username {
   margin: 0;
   font-size: 1.15rem;
@@ -346,6 +399,41 @@ button:focus-visible {
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0.25rem 0;
+}
+
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-section-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.business-upgrade-btn {
+  padding: 0.6em 1em;
+  background-color: transparent;
+  color: #646cff;
+  border: 1px solid #646cff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.25s, color 0.25s;
+}
+
+.business-upgrade-btn:hover:not(:disabled) {
+  background-color: #646cff;
+  color: #fff;
+}
+
+.business-upgrade-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .modal-success {
@@ -454,6 +542,25 @@ button:focus-visible {
   }
   .profile-email {
     color: #6b7280;
+  }
+  .profile-business-dashboard-btn {
+    color: #535bf2;
+    border-color: #535bf2;
+  }
+  .profile-business-dashboard-btn:hover {
+    background-color: #535bf2;
+    color: #fff;
+  }
+  .modal-section-label {
+    color: #374151;
+  }
+  .business-upgrade-btn {
+    color: #535bf2;
+    border-color: #535bf2;
+  }
+  .business-upgrade-btn:hover:not(:disabled) {
+    background-color: #535bf2;
+    color: #fff;
   }
   .modal-card {
     background-color: #fff;

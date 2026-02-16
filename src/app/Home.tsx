@@ -1,9 +1,13 @@
+import { useCallback, useState } from 'react'
 import '../styles/style.css'
 import PolarChart from '../components/PolarChart'
 
 export default function Home() {
-  
-  const vibe = [0,0,0,0,0,0]
+  const [vibe, setVibe] = useState<number[]>([0,0,0,0,0,0])
+
+  const reloadResults = useCallback((finalVibe: number[]) => {
+    void finalVibe
+  }, [])
 
   return (
     <div className="main home-grid">
@@ -14,7 +18,7 @@ export default function Home() {
 
       <aside className="chart-area">
         <h3>Vibe Chart</h3>
-        <PolarChart values={vibe} />
+        <PolarChart values={vibe} onChange={setVibe} onRelease={reloadResults} />
       </aside>
     </div>
   )

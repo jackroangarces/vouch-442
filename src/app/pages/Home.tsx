@@ -54,26 +54,31 @@ export default function Home() {
 */
   useEffect(function () {
     async function loadRestaurants() {
-      const snapshot = await getDocs(collection(db, "restaurants"));
+      try {
+        const snapshot = await getDocs(collection(db, "restaurants"));
 
-      const list: Restaurant[] = [];
-      for (let i = 0; i < snapshot.docs.length; i++) {
-        const doc = snapshot.docs[i];
-        const data: any = doc.data();
+        const list: Restaurant[] = [];
+        for (let i = 0; i < snapshot.docs.length; i++) {
+          const doc = snapshot.docs[i];
+          const data: any = doc.data();
 
-        const item: Restaurant = {
-          id: doc.id,
-          name: data.name,
-          description: data.description,
-          address: data.address,
-          lat: data.lat,
-          lng: data.lng
-        };
+          const item: Restaurant = {
+            id: doc.id,
+            name: typeof data.name === "string" ? data.name : "",
+            description: typeof data.description === "string" ? data.description : "",
+            address: typeof data.address === "string" ? data.address : "",
+            lat: typeof data.lat === "number" ? data.lat : Number.NaN,
+            lng: typeof data.lng === "number" ? data.lng : Number.NaN
+          };
 
-        list.push(item);
+          list.push(item);
+        }
+
+        setRestaurants(list);
+      } catch (error) {
+        console.error("Failed to load restaurants:", error);
+        setRestaurants([]);
       }
-
-      setRestaurants(list);
     }
 
     loadRestaurants();
@@ -85,6 +90,10 @@ export default function Home() {
   I mainly use this to sort restaurants by how close they are.
 */
   useEffect(function () {
+    if (!("geolocation" in navigator)) {
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       function (pos) {
         const coords = {
@@ -105,6 +114,15 @@ export default function Home() {
   Keeping it easy to read by hardcoding so it’s easy to debug if something is off.
 */
   function getDistance(aLat: number, aLng: number, bLat: number, bLng: number) {
+    if (
+      !Number.isFinite(aLat) ||
+      !Number.isFinite(aLng) ||
+      !Number.isFinite(bLat) ||
+      !Number.isFinite(bLng)
+    ) {
+      return Number.POSITIVE_INFINITY;
+    }
+
     const R = 6371;
     const dLat = (bLat - aLat) * (Math.PI / 180);
     const dLng = (bLng - aLng) * (Math.PI / 180);

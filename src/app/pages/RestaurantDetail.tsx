@@ -80,6 +80,15 @@ export default function RestaurantDetail() {
     }
 
     const restaurantId = id;
+
+    // Fallback for testing: show a dummy restaurant when ID is dummy1 (not in Firebase)
+    if (restaurantId === "dummy1") {
+      setRestaurant({ id: "dummy1", restaurantName: "Dummy Restaurant (for testing)" });
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     let cancelled = false;
 
     async function fetchRestaurant() {

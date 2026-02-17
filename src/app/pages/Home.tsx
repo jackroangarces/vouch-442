@@ -230,7 +230,10 @@ export default function Home() {
         <option value="farthest">Farthest first</option>
       </select>
 
-      {finalList.map(function (r) {
+      {[
+        { id: "dummy1", name: "Dummy Restaurant (for testing)", description: "", address: "", lat: 0, lng: 0 } as Restaurant,
+        ...finalList.filter((r) => r.name && r.name.trim() !== "")
+      ].map(function (r) {
         let distanceText = "";
         if (userLocation !== null) {
           const d = getDistance(userLocation.lat, userLocation.lng, r.lat, r.lng);
@@ -252,8 +255,8 @@ export default function Home() {
             }}
           >
             <h2>{r.name}</h2>
-            <p>{r.description}</p>
-            <p style={{ fontStyle: "italic" }}>{r.address}</p>
+            {r.description ? <p>{r.description}</p> : null}
+            {r.address ? <p style={{ fontStyle: "italic" }}>{r.address}</p> : null}
             {userLocation !== null && <p style={{ color: "#555" }}>{distanceText}</p>}
           </div>
         );

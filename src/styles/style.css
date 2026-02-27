@@ -363,7 +363,7 @@ button:focus-visible {
 }
 
 .profile-vibe-chart {
-  display: flex;
+  display: flex;  
   justify-content: center;
   margin-bottom: 0.75rem;
 }
@@ -422,6 +422,59 @@ button:focus-visible {
 
 .profile-favorites-empty,
 .profile-favorites-loading {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.profile-cuisines-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 0 0 1rem 0;
+}
+
+.profile-cuisines-wrapper {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  min-width: 280px;
+  max-width: 600px;
+}
+
+.profile-cuisines-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.profile-cuisine-card {
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.profile-cuisine-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.profile-cuisine-rating {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-cuisines-empty,
+.profile-cuisines-loading {
   margin: 0;
   text-align: center;
   font-size: 0.95rem;
@@ -784,6 +837,30 @@ button:focus-visible {
   
   .profile-favorites-empty,
   .profile-favorites-loading {
+    color: #6b7280;
+  }
+  
+/* Top Cuisines */
+  .profile-cuisines-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  
+  .profile-cuisine-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+  }
+  
+  .profile-cuisine-name {
+    color: #213547;
+  }
+  
+  .profile-cuisine-rating {
+    color: #6b7280;
+  }
+  
+  .profile-cuisines-empty,
+  .profile-cuisines-loading {
     color: #6b7280;
   }
   

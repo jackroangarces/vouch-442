@@ -22,6 +22,20 @@ interface FavoriteRestaurant {
   rating: number;
 }
 
+interface TopCuisine {
+  cuisine: string;
+  avgRating: number;
+}
+
+function toTitleCase(s: string): string {
+  return s
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 // Profile Page
 export default function Profile() {
   const { user } = useAuth();
@@ -32,6 +46,8 @@ export default function Profile() {
   const [profileVibe, setProfileVibe] = useState<number[] | null>(null);
   const [profileReviewCount, setProfileReviewCount] = useState(0);
   const [loadingProfileVibe, setLoadingProfileVibe] = useState(true);
+  const [topCuisines, setTopCuisines] = useState<TopCuisine[]>([]);
+  const [loadingTopCuisines, setLoadingTopCuisines] = useState(true);
 
   useEffect(() => {
     async function loadFavorites() {
@@ -183,6 +199,93 @@ export default function Profile() {
     loadProfileVibe();
   }, [user?.uid]);
 
+  useEffect(() => {
+    async function loadCuisines() {
+      if (!user?.uid) {
+        setTopCuisines([]);
+        setLoadingTopCuisines(false);
+        return;
+      }
+
+      try {
+        setLoadingTopCuisines(true);
+        const reviewsSnapshot = await getDocs(
+          query(collection(db, "reviews"), where("userId", "==", user.uid))
+        );
+
+        if (reviewsSnapshot.empty) {
+          setTopCuisines([]);
+          return;
+        }
+
+        const byCuisine = new Map<
+          string,
+          { sum: number; count: number; displayName: string }
+        >();
+
+        for (const reviewDoc of reviewsSnapshot.docs) {
+          const reviewData = reviewDoc.data();
+          const restaurantId = reviewData.restaurantId;
+          const rating = Number(reviewData.rating);
+
+          if (!restaurantId || !Number.isFinite(rating)) continue;
+
+          let cuisineRaw: string | undefined;
+          try {
+            const restaurantSnap = await getDoc(doc(db, "restaurants", restaurantId));
+            if (restaurantSnap.exists()) {
+              cuisineRaw = restaurantSnap.data().cuisine;
+            }
+          } catch {
+            continue;
+          }
+
+          if (typeof cuisineRaw !== "string") continue;
+
+          const trimmed = cuisineRaw.trim();
+          if (!trimmed) continue;
+
+          const key = trimmed.toLowerCase();
+          const existing = byCuisine.get(key);
+
+          if (existing) {
+            existing.sum += rating;
+            existing.count += 1;
+          } else {
+            byCuisine.set(key, {
+              sum: rating,
+              count: 1,
+              displayName: toTitleCase(trimmed),
+            });
+          }
+        }
+
+        const withAvg: TopCuisine[] = Array.from(byCuisine.entries()).map(
+          ([_, { sum, count, displayName }]) => ({
+            cuisine: displayName,
+            avgRating: Math.round((sum / count) * 10) / 10,
+          })
+        );
+
+        // Sort by average rating desc, then cuisine name asc (alphabetically for ties)
+        withAvg.sort((a, b) => {
+          if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
+          return a.cuisine.localeCompare(b.cuisine);
+        });
+
+        const topThree = withAvg.slice(0, 3);
+        setTopCuisines(topThree);
+      } catch (error) {
+        console.error("Failed to load top cuisines:", error);
+        setTopCuisines([]);
+      } finally {
+        setLoadingTopCuisines(false);
+      }
+    }
+
+    loadCuisines();
+  }, [user?.uid]);
+
   return (
     <div className="profile-page">
       <div className="profile-card">
@@ -238,6 +341,24 @@ export default function Profile() {
                   <h3 className="profile-favorite-name">{favorite.restaurantName}</h3>
                 </Link>
                 <p className="profile-favorite-rating">Rating: {favorite.rating}/5</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="profile-cuisines-wrapper">
+        <p className="profile-cuisines-title">Top Cuisines</p>
+        {loadingTopCuisines ? (
+          <p className="profile-cuisines-loading">Loading top cuisines...</p>
+        ) : topCuisines.length === 0 ? (
+          <p className="profile-cuisines-empty">No top cuisines yet</p>
+        ) : (
+          <div className="profile-cuisines-grid">
+            {topCuisines.map((item) => (
+              <div key={item.cuisine} className="profile-cuisine-card">
+                <h3 className="profile-cuisine-name">{item.cuisine}</h3>
+                <p className="profile-cuisine-rating">Avg rating: {item.avgRating}/5</p>
               </div>
             ))}
           </div>

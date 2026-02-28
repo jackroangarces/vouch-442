@@ -81,7 +81,7 @@ export default function RestaurantDetail() {
 
     const restaurantId = id;
 
-    // Fallback for testing: show a dummy restaurant when ID is dummy1 (not in Firebase)
+    // creates a fallback just in case for testing cases for sprint 1
     if (restaurantId === "dummy1") {
       setRestaurant({ id: "dummy1", restaurantName: "Dummy Restaurant (for testing)" });
       setLoading(false);

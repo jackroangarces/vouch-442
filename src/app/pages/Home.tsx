@@ -17,16 +17,13 @@ export default function Home() {
 //
 //
 //
-//
 // IMPLEMENTING SEARCH FILTERING BY TEXT AND LOCATION SORTING
-//
-//
 //
 //
 //
 
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { useNavigate } from "react-router-dom";
 
@@ -39,10 +36,20 @@ interface Restaurant {
   lng: number;
 }
 
+type Review = {
+  id: string;
+  userId?: string;
+  rating?: number;
+  text?: string;
+  createdAt?: any;
+  vibe?: number[];
+};
+
 export default function Home() {
   const navigate = useNavigate();
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [reviewsMap, setReviewsMap] = useState<Record<string, Review[]>>({});
   const [searchText, setSearchText] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortMode, setSortMode] = useState("none");
@@ -83,6 +90,55 @@ export default function Home() {
 
     loadRestaurants();
   }, []);
+
+  // After restaurants are loaded, fetch the most recent review for each restaurant
+  useEffect(() => {
+    if (!restaurants || restaurants.length === 0) return;
+
+    let cancelled = false;
+
+    async function loadRecentReviews() {
+      const map: Record<string, Review[]> = {};
+      // For each restaurant, query the latest review (limit 1)
+      await Promise.all(
+        restaurants.map(async (r) => {
+          try {
+            const q = query(
+              collection(db, "reviews"),
+              where("restaurantId", "==", r.id),
+              orderBy("createdAt", "desc"),
+              limit(1)
+            );
+            const snap = await getDocs(q);
+            const arr: Review[] = [];
+            snap.forEach((d) => {
+              const data: any = d.data();
+              arr.push({
+                id: d.id,
+                userId: data.userId,
+                rating: typeof data.rating === "number" ? data.rating : undefined,
+                text: typeof data.text === "string" ? data.text : undefined,
+                createdAt: data.createdAt,
+                vibe: Array.isArray(data.vibe) ? data.vibe : undefined,
+              });
+            });
+            map[r.id] = arr;
+          } catch (err) {
+            console.error("Failed to load review for", r.id, err);
+            map[r.id] = [];
+          }
+        })
+      );
+
+      if (!cancelled) setReviewsMap(map);
+    }
+
+    loadRecentReviews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [restaurants]);
 
   /* 
   Asking the browser for the user's current location so we can calculate distances later. 
@@ -258,12 +314,24 @@ export default function Home() {
             {r.description ? <p>{r.description}</p> : null}
             {r.address ? <p style={{ fontStyle: "italic" }}>{r.address}</p> : null}
             {userLocation !== null && <p style={{ color: "#555" }}>{distanceText}</p>}
+            {/* Recent review snippet */}
+            {reviewsMap[r.id] && reviewsMap[r.id].length > 0 ? (
+              <div style={{ marginTop: 8, background: "#fafafa", padding: 8, borderRadius: 6 }}>
+                <div style={{ fontSize: 14, color: "#333", marginBottom: 4 }}>
+                  {reviewsMap[r.id][0].rating ? `★${reviewsMap[r.id][0].rating}` : "Review"}
+                </div>
+                {reviewsMap[r.id][0].text ? (
+                  <div style={{ fontSize: 13, color: "#444" }}>
+                    {reviewsMap[r.id][0].text.length > 120
+                      ? reviewsMap[r.id][0].text.slice(0, 120) + "…"
+                      : reviewsMap[r.id][0].text}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         );
       })}
     </div>
   );
 }
-
-
-

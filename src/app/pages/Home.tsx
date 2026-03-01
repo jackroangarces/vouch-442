@@ -91,7 +91,7 @@ export default function Home() {
     loadRestaurants();
   }, []);
 
-  // After restaurants are loaded, fetch the most recent review for each restaurant
+  
   useEffect(() => {
     if (!restaurants || restaurants.length === 0) return;
 
@@ -99,7 +99,7 @@ export default function Home() {
 
     async function loadRecentReviews() {
       const map: Record<string, Review[]> = {};
-      // For each restaurant, query the latest review (limit 1)
+      
       await Promise.all(
         restaurants.map(async (r) => {
           try {

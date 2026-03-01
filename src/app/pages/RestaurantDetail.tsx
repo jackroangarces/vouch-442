@@ -81,7 +81,7 @@ export default function RestaurantDetail() {
 
     const restaurantId = id;
 
-    // creates a fallback just in case for testing cases for sprint 1
+    // fallback
     if (restaurantId === "dummy1") {
       setRestaurant({ id: "dummy1", restaurantName: "Dummy Restaurant (for testing)" });
       setLoading(false);

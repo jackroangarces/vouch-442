@@ -1,206 +1,170 @@
-import { useEffect, useMemo, useState } from "react";
-import { arrayRemove, arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
+import { useState, type FormEvent } from "react";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
-import type { RestaurantImage } from "../types/restaurant";
+import { useAuth } from "../contexts/AuthContext";
 
 type Props = {
-  restaurantId: string;
   onClose: () => void;
+  onSuccess?: (restaurantId: string) => void;
 };
 
-export default function RestaurantImagesModal({ restaurantId, onClose }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [images, setImages] = useState<RestaurantImage[]>([]);
-  const [link, setLink] = useState("");
-  const [previewUrl, setPreviewUrl] = useState("");
+function isValidRestaurantName(name: string) {
+  const trimmed = name.trim();
+  if (trimmed.length < 2 || trimmed.length > 60) return false;
+  return /^[A-Za-z0-9][A-Za-z0-9 &'’.-]*$/.test(trimmed);
+}
+
+export default function AddBusinessModal({ onClose, onSuccess }: Props) {
+  const { user } = useAuth();
+
+  const [restaurantName, setRestaurantName] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const restaurantDocRef = useMemo(() => doc(db, "restaurants", restaurantId), [restaurantId]);
-
-  function isDirectImageUrl(url: string) {
-    return /^https?:\/\/.+\.(png|jpg|jpeg|gif|webp|avif)(\?.*)?$/i.test(url);
+  function resetError() {
+    setError("");
   }
 
-  function normalizeImgurUrl(raw: string) {
-    const trimmed = raw.trim();
-    if (!trimmed) return "";
+  function validateInputs() {
+    const name = restaurantName.trim();
+    const loc = location.trim();
 
-    try {
-      const u = new URL(trimmed);
-      const host = u.hostname.replace(/^www\./, "");
-
-      if (host === "i.imgur.com") return trimmed;
-
-      if (host === "imgur.com" || host === "m.imgur.com") {
-        const path = u.pathname.replace(/^\/+/, "");
-        if (!path || path.startsWith("a/") || path.startsWith("gallery/")) return "";
-
-        const id = path.split("/")[0];
-        if (!id) return "";
-
-        if (/\.(png|jpg|jpeg|gif|webp|avif)$/i.test(id)) return `https://i.imgur.com/${id}`;
-        return `https://i.imgur.com/${id}.jpg`;
-      }
-
-      return trimmed;
-    } catch {
-      return trimmed;
+    if (!isValidRestaurantName(name)) {
+      alert("Invalid Restaurant Name");
+      setError("Invalid Restaurant Name");
+      return null;
     }
-  }
 
-  function makeExternalId(url: string) {
-    return `external:${restaurantId}:${Date.now()}:${Math.random().toString(16).slice(2)}:${url}`;
-  }
-
-  function clearInput() {
-    setLink("");
-    setPreviewUrl("");
-  }
-
-  async function loadImages() {
-    setLoading(true);
-    try {
-      const snap = await getDoc(restaurantDocRef);
-      const raw = snap.exists() ? (snap.data() as any).images : [];
-      setImages(Array.isArray(raw) ? raw : []);
-    } finally {
-      setLoading(false);
+    if (!loc) {
+      setError("Location is required");
+      return null;
     }
+
+    return {
+      name,
+      loc,
+      desc: description.trim(),
+    };
   }
 
-  async function verifyImageLoads(url: string) {
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-      const timeout = window.setTimeout(() => reject(new Error("timeout")), 8000);
+  async function createOrUpdateBusiness(restaurantId: string, name: string, loc: string, desc: string) {
+    if (!user) throw new Error("Not logged in");
 
-      img.onload = () => {
-        window.clearTimeout(timeout);
-        resolve();
-      };
+    const restaurantRef = doc(db, "restaurants", restaurantId);
+    const userRef = doc(db, "users", user.uid);
 
-      img.onerror = () => {
-        window.clearTimeout(timeout);
-        reject(new Error("load failed"));
-      };
+    await setDoc(
+      restaurantRef,
+      {
+        restaurantName: name,
+        location: loc,
+        description: desc,
+        ownerId: user.uid,
+        createdAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
 
-      img.referrerPolicy = "no-referrer";
-      img.src = url;
-    });
+    await setDoc(
+      userRef,
+      {
+        isBusiness: true,
+        restaurantId,
+        restaurantName: name,
+      },
+      { merge: true },
+    );
   }
 
-  async function uploadLink() {
-    const normalized = normalizeImgurUrl(link);
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    resetError();
 
-    if (!normalized || !isDirectImageUrl(normalized)) {
-      alert("Error uploading image");
+    if (!user) {
+      setError("Please log in.");
       return;
     }
 
+    const validated = validateInputs();
+    if (!validated) return;
+
+    const restaurantId = user.uid;
+
     setSaving(true);
-
     try {
-      await verifyImageLoads(normalized);
+      await createOrUpdateBusiness(restaurantId, validated.name, validated.loc, validated.desc);
 
-      const image: RestaurantImage = {
-        url: normalized,
-        path: makeExternalId(normalized),
-      };
-
-      await setDoc(restaurantDocRef, { images: arrayUnion(image) }, { merge: true });
-
-      clearInput();
-      await loadImages();
+      onSuccess?.(restaurantId);
+      onClose();
     } catch (err) {
       console.error(err);
-      alert("Error uploading image");
+      setError("Something went wrong");
     } finally {
       setSaving(false);
     }
   }
 
-  async function removeImage(img: RestaurantImage) {
-    try {
-      await setDoc(restaurantDocRef, { images: arrayRemove(img) }, { merge: true });
-      await loadImages();
-    } catch (err) {
-      console.error(err);
-      alert("Error uploading image");
-    }
-  }
-
-  function handleLinkChange(v: string) {
-    setLink(v);
-
-    const normalized = normalizeImgurUrl(v);
-    setPreviewUrl(normalized && isDirectImageUrl(normalized) ? normalized : "");
-  }
-
-  useEffect(() => {
-    void loadImages();
-  }, [restaurantId]);
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Images / Remove Images</h2>
+          <h2>Add A Business</h2>
           <button type="button" className="modal-close" onClick={onClose}>
             &times;
           </button>
         </div>
 
-        <div className="modal-body">
-          <div className="image-upload-row">
-            <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              Imgur direct image link
-              <input
-                type="url"
-                value={link}
-                onChange={(e) => handleLinkChange(e.target.value)}
-                placeholder="https://i.imgur.com/xxxxx.jpg"
-              />
-            </label>
+        <form className="modal-body" onSubmit={handleSubmit}>
+          {error && <p className="auth-error">{error}</p>}
+
+          <label>
+            Restaurant Name
+            <input
+              value={restaurantName}
+              onChange={(e) => setRestaurantName(e.target.value)}
+              placeholder="Ex: Vouch Cafe"
+              onFocus={resetError}
+            />
+          </label>
+
+          <label>
+            Location
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Ex: Seattle, WA"
+              onFocus={resetError}
+            />
+          </label>
+
+          <label>
+            Description (optional)
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short description..."
+              rows={3}
+              onFocus={resetError}
+            />
+          </label>
+
+          <div className="modal-footer">
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
 
             <button
-              type="button"
-              className="auth-submit image-upload-btn"
-              onClick={() => void uploadLink()}
-              disabled={saving || !link.trim()}
+              type="submit"
+              className="auth-submit"
+              disabled={saving || !restaurantName.trim() || !location.trim()}
             >
-              {saving ? "Uploading…" : "Upload"}
+              {saving ? "Creating…" : "Create Business"}
             </button>
           </div>
-
-          {previewUrl && (
-            <div className="image-preview">
-              <p style={{ margin: 0, opacity: 0.75 }}>Preview</p>
-              <img src={previewUrl} alt="Preview" />
-            </div>
-          )}
-
-          {loading ? (
-            <p style={{ margin: 0, opacity: 0.7 }}>Loading…</p>
-          ) : images.length === 0 ? (
-            <p className="images-empty">No images found</p>
-          ) : (
-            <div className="images-grid">
-              {images.map((img) => (
-                <div key={img.path ?? img.url} className="images-grid-item">
-                  <img src={img.url} alt="Restaurant" />
-                  <button type="button" className="images-remove" onClick={() => void removeImage(img)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="modal-footer">
-          <button type="button" onClick={onClose}>
-            Close
-          </button>
-        </div>
+        </form>
       </div>
     </div>
   );

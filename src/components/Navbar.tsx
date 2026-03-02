@@ -3,13 +3,12 @@ import VouchLogo from "/assets/logos/VouchLogo.png";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserProfile } from "../contexts/UserProfileContext";
 import AddBusinessModal from "./AddBusinessModal";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [q, setQ] = useState('')
   const { isBusiness } = useUserProfile();
   const [showAddBusiness, setShowAddBusiness] = useState(false);
 
@@ -24,13 +23,6 @@ export function Navbar() {
   function onBusinessCreated() {
     setShowAddBusiness(false);
     navigate("/profile/businesses");
-  }
-  
-  function onSearch(e: FormEvent) {
-    e.preventDefault()
-    
-    console.log('search submit', q)
-    
   }
 
   return (

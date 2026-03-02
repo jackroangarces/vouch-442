@@ -2,10 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../services/firebase";
-import {
-  DUMMY_RESTAURANTS,
-  DUMMY_RESTAURANT_AGGREGATES,
-} from "../../data/dummyRestaurants";
 import PolarChart from "../../components/PolarChart";
 
 type SortMode = "none" | "nearest" | "farthest";
@@ -37,18 +33,6 @@ function readNumber(value: unknown): number {
   return Number.NaN;
 }
 
-function readVibe(value: unknown): number[] | null {
-  if (!Array.isArray(value) || value.length !== 6) return null;
-
-  const out = value.map((axis) => {
-    const n = readNumber(axis);
-    if (!Number.isFinite(n)) return 0;
-    return Math.max(0, Math.min(5, n));
-  });
-
-  return out;
-}
-
 function readCoordinate(data: Record<string, unknown>, kind: "lat" | "lng"): number {
   const direct = readNumber(data[kind]);
   if (Number.isFinite(direct)) return direct;
@@ -68,7 +52,19 @@ function readCoordinate(data: Record<string, unknown>, kind: "lat" | "lng"): num
   return Number.NaN;
 }
 
-function mapRestaurantDoc(id: string, rawData: Record<string, unknown>): HomeRestaurant | null {
+function normalizeVibe(value: unknown): number[] | null {
+  if (!Array.isArray(value) || value.length !== 6) return null;
+
+  const out = value.map((axis) => {
+    const n = readNumber(axis);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(5, n));
+  });
+
+  return out;
+}
+
+function mapRestaurantDoc(id: string, rawData: Record<string, unknown>): Omit<HomeRestaurant, "vibe"> | null {
   const restaurantName = readString(rawData.restaurantName) || readString(rawData.name);
   if (!restaurantName) return null;
 
@@ -80,7 +76,6 @@ function mapRestaurantDoc(id: string, rawData: Record<string, unknown>): HomeRes
     cuisine: readString(rawData.cuisine),
     lat: readCoordinate(rawData, "lat"),
     lng: readCoordinate(rawData, "lng"),
-    vibe: readVibe(rawData.vibe),
   };
 }
 
@@ -129,27 +124,10 @@ function isVibeMatch(vibeQuery: number[], vibeTarget: number[]): boolean {
   return meanDelta <= VIBE_MATCH_MAX_DELTA;
 }
 
-function buildFallbackRestaurants(): HomeRestaurant[] {
-  return DUMMY_RESTAURANTS.map((restaurant) => ({
-    ...restaurant,
-    vibe: DUMMY_RESTAURANT_AGGREGATES[restaurant.id]?.vibe ?? null,
-  }));
-}
-
-type Review = {
-  id: string;
-  userId?: string;
-  rating?: number;
-  text?: string;
-  createdAt?: any;
-  vibe?: number[];
-};
-
 export default function Home() {
   const navigate = useNavigate();
-  const [restaurants, setRestaurants] = useState<HomeRestaurant[]>(buildFallbackRestaurants());
-  // store the single most-recent review (or null) per restaurant for simpler access
-  const [reviewsMap, setReviewsMap] = useState<Record<string, Review | null>>({});
+
+  const [restaurants, setRestaurants] = useState<HomeRestaurant[]>([]);
   const [searchText, setSearchText] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("none");
   const [loading, setLoading] = useState(true);
@@ -163,29 +141,48 @@ export default function Home() {
     async function loadRestaurants() {
       setLoading(true);
       try {
-        const snapshot = await getDocs(collection(db, "restaurants"));
-        const byId = new Map<string, HomeRestaurant>(
-          buildFallbackRestaurants().map((restaurant) => [restaurant.id, restaurant]),
-        );
+        const [restaurantSnap, reviewSnap] = await Promise.all([
+          getDocs(collection(db, "restaurants")),
+          getDocs(collection(db, "reviews")),
+        ]);
 
-        snapshot.forEach((restaurantDoc) => {
+        const vibeAgg = new Map<string, { sums: number[]; count: number }>();
+        reviewSnap.forEach((reviewDoc) => {
+          const data = reviewDoc.data() as Record<string, unknown>;
+          const restaurantId = readString(data.restaurantId);
+          const vibe = normalizeVibe(data.vibe);
+          if (!restaurantId || !vibe) return;
+
+          const existing = vibeAgg.get(restaurantId);
+          if (existing) {
+            for (let i = 0; i < 6; i++) existing.sums[i] += vibe[i];
+            existing.count += 1;
+          } else {
+            vibeAgg.set(restaurantId, { sums: [...vibe], count: 1 });
+          }
+        });
+
+        const list: HomeRestaurant[] = [];
+        restaurantSnap.forEach((restaurantDoc) => {
           const mapped = mapRestaurantDoc(
             restaurantDoc.id,
             restaurantDoc.data() as Record<string, unknown>,
           );
           if (!mapped) return;
 
-          const existing = byId.get(mapped.id);
-          byId.set(mapped.id, {
-            ...mapped,
-            vibe: mapped.vibe ?? existing?.vibe ?? null,
-          });
+          const agg = vibeAgg.get(mapped.id);
+          const vibe =
+            agg && agg.count > 0
+              ? agg.sums.map((s) => Math.round((s / agg.count) * 10) / 10)
+              : null;
+
+          list.push({ ...mapped, vibe });
         });
 
-        if (!cancelled) setRestaurants(Array.from(byId.values()));
+        if (!cancelled) setRestaurants(list);
       } catch (error) {
-        console.error("Failed to load restaurants. Showing dummy data only.", error);
-        if (!cancelled) setRestaurants(buildFallbackRestaurants());
+        console.error("Failed to load restaurants.", error);
+        if (!cancelled) setRestaurants([]);
       } finally {
         if (!cancelled) setLoading(false);
       }

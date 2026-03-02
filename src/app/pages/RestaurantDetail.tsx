@@ -5,6 +5,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
   setDoc,
   serverTimestamp,
@@ -21,6 +23,21 @@ import {
 } from "../../data/dummyRestaurants";
 
 const ZERO_VIBE = [0, 0, 0, 0, 0, 0];
+
+type LatestReview = {
+  id: string;
+  rating?: number;
+  text?: string;
+  createdAtMs: number;
+};
+
+function toMilliseconds(v: any): number {
+  if (!v) return 0;
+  if (typeof v?.toMillis === "function") return v.toMillis();
+  if (v instanceof Date) return v.getTime();
+  if (typeof v === "number") return v;
+  return 0;
+}
 
 function normalizeVibe(v: unknown): number[] | null {
   if (!Array.isArray(v) || v.length !== 6) return null;
@@ -59,6 +76,7 @@ export default function RestaurantDetail() {
 
   const [restaurantVibe, setRestaurantVibe] = useState<number[]>([0, 0, 0, 0, 0, 0]);
   const [restaurantReviewCount, setRestaurantReviewCount] = useState(0);
+  const [latestReview, setLatestReview] = useState<LatestReview | null>(null);
 
   async function loadRestaurantAggregate(restaurantId: string) {
     const dummyAggregate = getDummyRestaurantAggregateById(restaurantId);
@@ -97,6 +115,54 @@ export default function RestaurantDetail() {
 
     setRestaurantReviewCount(vibes.length);
     setRestaurantVibe(avgVibe(vibes));
+  }
+
+  async function loadLatestReview(restaurantId: string) {
+    try {
+      const q = query(
+        collection(db, "reviews"),
+        where("restaurantId", "==", restaurantId),
+        orderBy("createdAt", "desc"),
+        limit(1),
+      );
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        setLatestReview(null);
+        return;
+      }
+
+      const d = snap.docs[0];
+      const data: any = d.data();
+      setLatestReview({
+        id: d.id,
+        rating: typeof data.rating === "number" ? data.rating : undefined,
+        text: typeof data.text === "string" ? data.text : undefined,
+        createdAtMs: toMilliseconds(data.createdAt),
+      });
+    } catch {
+      try {
+        const snap = await getDocs(
+          query(collection(db, "reviews"), where("restaurantId", "==", restaurantId)),
+        );
+
+        let best: LatestReview | null = null;
+        snap.forEach((d) => {
+          const data: any = d.data();
+          const candidate: LatestReview = {
+            id: d.id,
+            rating: typeof data.rating === "number" ? data.rating : undefined,
+            text: typeof data.text === "string" ? data.text : undefined,
+            createdAtMs: toMilliseconds(data.createdAt),
+          };
+          if (!best || candidate.createdAtMs > best.createdAtMs) best = candidate;
+        });
+
+        setLatestReview(best);
+      } catch {
+        setLatestReview(null);
+      }
+    }
   }
 
   useEffect(() => {
@@ -151,6 +217,7 @@ export default function RestaurantDetail() {
     async function run() {
       try {
         await loadRestaurantAggregate(restaurantId);
+        await loadLatestReview(restaurantId);
       } catch {
       }
     }
@@ -235,6 +302,7 @@ export default function RestaurantDetail() {
       });
 
       await loadRestaurantAggregate(restaurantId);
+      await loadLatestReview(restaurantId);
 
       setHasReviewed(true);
       setShowReviewModal(false);
@@ -282,6 +350,28 @@ export default function RestaurantDetail() {
           >
             {!user ? "Log in to review" : hasReviewed ? "Review submitted" : "Write a review"}
           </button>
+
+          {latestReview && (latestReview.text || latestReview.rating != null) ? (
+            <div
+              style={{
+                marginTop: 14,
+                border: "1px solid rgba(255,255,255,0.18)",
+                borderRadius: 10,
+                padding: 12,
+                background: "rgba(255,255,255,0.04)",
+              }}
+            >
+              <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 6 }}>Latest review</div>
+              <div style={{ fontSize: 14, marginBottom: latestReview.text ? 6 : 0 }}>
+                {latestReview.rating != null ? `★${latestReview.rating}` : "Review"}
+              </div>
+              {latestReview.text ? (
+                <div style={{ fontSize: 13, opacity: 0.85 }}>
+                  {latestReview.text.length > 180 ? latestReview.text.slice(0, 180) + "…" : latestReview.text}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div style={{ width: 320, maxWidth: "100%" }}>

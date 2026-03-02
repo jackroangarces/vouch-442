@@ -278,9 +278,7 @@ export default function Home() {
         <select
           id="sort-select"
           value={sortMode}
-          onChange={function (e) {
-            setSortMode(e.target.value);
-          }}
+          onChange={(e) => setSortMode(e.target.value as SortMode)}
           className="home-control-input"
         >
           <option value="none">Sort by…</option>

@@ -208,7 +208,12 @@ export default function Home() {
     <div style={{ padding: 20 }}>
       <h1>Restaurants</h1>
 
+      <label htmlFor="restaurant-search" className="visually-hidden">
+        Search restaurants 
+      </label>
+
       <input
+        id="restaurant-search"
         type="text"
         placeholder="Search..."
         value={searchText}
@@ -218,12 +223,17 @@ export default function Home() {
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
+      <label htmlFor="sort-select" className="visually-hidden">
+        Sort restaurants
+      </label>
+
       <select
+        id="sort-select"
         value={sortMode}
         onChange={function (e) {
           setSortMode(e.target.value);
         }}
-        style={{ width: "100%", padding: 10, marginBottom: 20 }}
+        style={{width : "100%", padding : 10, marginBottom : 20}}
       >
         <option value="none">Sort by…</option>
         <option value="nearest">Nearest first</option>

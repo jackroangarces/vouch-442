@@ -136,10 +136,20 @@ function buildFallbackRestaurants(): HomeRestaurant[] {
   }));
 }
 
+type Review = {
+  id: string;
+  userId?: string;
+  rating?: number;
+  text?: string;
+  createdAt?: any;
+  vibe?: number[];
+};
+
 export default function Home() {
   const navigate = useNavigate();
-
   const [restaurants, setRestaurants] = useState<HomeRestaurant[]>(buildFallbackRestaurants());
+  // store the single most-recent review (or null) per restaurant for simpler access
+  const [reviewsMap, setReviewsMap] = useState<Record<string, Review | null>>({});
   const [searchText, setSearchText] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("none");
   const [loading, setLoading] = useState(true);

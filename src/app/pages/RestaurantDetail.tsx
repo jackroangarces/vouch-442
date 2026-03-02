@@ -342,6 +342,16 @@ export default function RestaurantDetail() {
         <div style={{ flex: 1, minWidth: 280 }}>
           <h1>{restaurant.restaurantName}</h1>
 
+          <div className="restaurant-gallery">
+  {(restaurant.images?.length ?? 0) === 0 ? (
+    <img className="restaurant-photo" src="/assets/placeholder.png" alt="Restaurant" />
+  ) : (
+    restaurant.images!.map((img) => (
+      <img key={img.path} className="restaurant-photo" src={img.url} alt="Restaurant" />
+    ))
+  )}
+</div>
+          
           <button
             type="button"
             className="restaurant-review-btn"
@@ -384,7 +394,6 @@ export default function RestaurantDetail() {
           </p>
         </div>
       </div>
-
       {showReviewModal && (
         <div className="modal-overlay" onClick={() => setShowReviewModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>

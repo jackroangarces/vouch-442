@@ -26,21 +26,6 @@ export function Navbar() {
               fetchpriority="high"
               decoding="async"/>
       </Link>
-      <form className="navbar-search" onSubmit={onSearch}>
-        <label htmlFor="search-input" className="visually-hidden">
-          Search restaurants
-        </label>
-
-        <input
-          id="search-input"
-          type="search"
-          placeholder="Search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-
-        <button type="submit">Search</button>
-      </form>
       <div className="navbar-right">
         {loading ? (
           <span className="navbar-user">…</span>

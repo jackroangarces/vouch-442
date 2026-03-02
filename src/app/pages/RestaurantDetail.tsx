@@ -70,6 +70,15 @@ export default function RestaurantDetail() {
   return (
     <div className="main">
       <h1>{restaurant.restaurantName}</h1>
+      <div className="restaurant-gallery">
+  {(restaurant.images?.length ?? 0) === 0 ? (
+    <img className="restaurant-photo" src="/assets/placeholder.png" alt="Restaurant" />
+  ) : (
+    restaurant.images!.map((img) => (
+      <img key={img.path} className="restaurant-photo" src={img.url} alt="Restaurant" />
+    ))
+  )}
+</div>
       <button
         type="button"
         className="restaurant-review-btn"

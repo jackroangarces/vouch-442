@@ -36,11 +36,11 @@ export function Navbar() {
   return (
     <nav className="navbar" role="navigation">
       <Link to="/" className="navbar-logo">
-          <img src="../../public/assets/logos/VouchLogo.png"
+          <img
+              src={VouchLogo}
               width="205" 
               height="77"
               alt="Vouch logo"
-              fetchpriority="high"
               decoding="async"/>
       </Link>
       <div className="navbar-right">

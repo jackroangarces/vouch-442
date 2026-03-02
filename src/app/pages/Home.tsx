@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../services/firebase";
-import { DUMMY_RESTAURANTS } from "../../data/dummyRestaurants";
+import {
+  DUMMY_RESTAURANTS,
+  DUMMY_RESTAURANT_AGGREGATES,
+} from "../../data/dummyRestaurants";
+import PolarChart from "../../components/PolarChart";
 
 type SortMode = "none" | "nearest" | "farthest";
 
@@ -14,7 +18,11 @@ interface HomeRestaurant {
   cuisine: string;
   lat: number;
   lng: number;
+  vibe: number[] | null;
 }
+
+const EMPTY_VIBE_QUERY = [0, 0, 0, 0, 0, 0];
+const VIBE_MATCH_MAX_DELTA = 1.25;
 
 function readString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -27,6 +35,18 @@ function readNumber(value: unknown): number {
     if (Number.isFinite(parsed)) return parsed;
   }
   return Number.NaN;
+}
+
+function readVibe(value: unknown): number[] | null {
+  if (!Array.isArray(value) || value.length !== 6) return null;
+
+  const out = value.map((axis) => {
+    const n = readNumber(axis);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(5, n));
+  });
+
+  return out;
 }
 
 function readCoordinate(data: Record<string, unknown>, kind: "lat" | "lng"): number {
@@ -60,6 +80,7 @@ function mapRestaurantDoc(id: string, rawData: Record<string, unknown>): HomeRes
     cuisine: readString(rawData.cuisine),
     lat: readCoordinate(rawData, "lat"),
     lng: readCoordinate(rawData, "lng"),
+    vibe: readVibe(rawData.vibe),
   };
 }
 
@@ -87,15 +108,44 @@ function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): nu
   return 2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function isVibeQueryActive(vibeQuery: number[]): boolean {
+  return vibeQuery.some((axis) => axis > 0);
+}
+
+function isVibeMatch(vibeQuery: number[], vibeTarget: number[]): boolean {
+  const activeAxes = vibeQuery
+    .map((axis, idx) => ({ axis, idx }))
+    .filter((entry) => entry.axis > 0)
+    .map((entry) => entry.idx);
+
+  if (activeAxes.length === 0) return true;
+
+  let totalDelta = 0;
+  for (const idx of activeAxes) {
+    totalDelta += Math.abs(vibeQuery[idx] - vibeTarget[idx]);
+  }
+
+  const meanDelta = totalDelta / activeAxes.length;
+  return meanDelta <= VIBE_MATCH_MAX_DELTA;
+}
+
+function buildFallbackRestaurants(): HomeRestaurant[] {
+  return DUMMY_RESTAURANTS.map((restaurant) => ({
+    ...restaurant,
+    vibe: DUMMY_RESTAURANT_AGGREGATES[restaurant.id]?.vibe ?? null,
+  }));
+}
+
 export default function Home() {
   const navigate = useNavigate();
 
-  const [restaurants, setRestaurants] = useState<HomeRestaurant[]>(DUMMY_RESTAURANTS);
+  const [restaurants, setRestaurants] = useState<HomeRestaurant[]>(buildFallbackRestaurants());
   const [searchText, setSearchText] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("none");
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [vibeQuery, setVibeQuery] = useState<number[]>(EMPTY_VIBE_QUERY);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,7 +155,7 @@ export default function Home() {
       try {
         const snapshot = await getDocs(collection(db, "restaurants"));
         const byId = new Map<string, HomeRestaurant>(
-          DUMMY_RESTAURANTS.map((restaurant) => [restaurant.id, restaurant]),
+          buildFallbackRestaurants().map((restaurant) => [restaurant.id, restaurant]),
         );
 
         snapshot.forEach((restaurantDoc) => {
@@ -113,13 +163,19 @@ export default function Home() {
             restaurantDoc.id,
             restaurantDoc.data() as Record<string, unknown>,
           );
-          if (mapped) byId.set(mapped.id, mapped);
+          if (!mapped) return;
+
+          const existing = byId.get(mapped.id);
+          byId.set(mapped.id, {
+            ...mapped,
+            vibe: mapped.vibe ?? existing?.vibe ?? null,
+          });
         });
 
         if (!cancelled) setRestaurants(Array.from(byId.values()));
       } catch (error) {
         console.error("Failed to load restaurants. Showing dummy data only.", error);
-        if (!cancelled) setRestaurants(DUMMY_RESTAURANTS);
+        if (!cancelled) setRestaurants(buildFallbackRestaurants());
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -157,22 +213,33 @@ export default function Home() {
     );
   }, [sortMode, userLocation]);
 
+  const hasTextQuery = searchText.trim().length > 0;
+  const hasVibeQuery = isVibeQueryActive(vibeQuery);
+  const hasActiveQuery = hasTextQuery || hasVibeQuery;
+
   const visibleRestaurants = useMemo(() => {
     const q = searchText.trim().toLowerCase();
 
     const filtered = restaurants.filter((restaurant) => {
-      if (!q) return true;
+      if (q) {
+        const searchableText = [
+          restaurant.restaurantName,
+          restaurant.description,
+          restaurant.address,
+          restaurant.cuisine,
+        ]
+          .join(" ")
+          .toLowerCase();
 
-      const searchableText = [
-        restaurant.restaurantName,
-        restaurant.description,
-        restaurant.address,
-        restaurant.cuisine,
-      ]
-        .join(" ")
-        .toLowerCase();
+        if (!searchableText.includes(q)) return false;
+      }
 
-      return searchableText.includes(q);
+      if (hasVibeQuery) {
+        if (!restaurant.vibe) return false;
+        if (!isVibeMatch(vibeQuery, restaurant.vibe)) return false;
+      }
+
+      return true;
     });
 
     if (sortMode === "none" || userLocation === null) return filtered;
@@ -182,30 +249,45 @@ export default function Home() {
       const distB = haversineKm(userLocation.lat, userLocation.lng, b.lat, b.lng);
       return sortMode === "nearest" ? distA - distB : distB - distA;
     });
-  }, [restaurants, searchText, sortMode, userLocation]);
+  }, [restaurants, searchText, sortMode, userLocation, hasVibeQuery, vibeQuery]);
 
   return (
     <div className="main">
       <h1>Restaurants</h1>
 
-      <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
+      <div className="home-controls">
         <input
           type="text"
           value={searchText}
           placeholder="Search by name, cuisine, description, or address"
           onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: "100%", padding: 10 }}
+          className="home-control-input"
         />
 
         <select
           value={sortMode}
           onChange={(e) => setSortMode(e.target.value as SortMode)}
-          style={{ width: "100%", padding: 10 }}
+          className="home-control-input"
         >
           <option value="none">Sort: None</option>
           <option value="nearest">Sort: Nearest first</option>
           <option value="farthest">Sort: Farthest first</option>
         </select>
+      </div>
+
+      <div className="home-vibe-filter">
+        <div className="home-vibe-header">
+          <h3>Vibe Filter</h3>
+          <button
+            type="button"
+            onClick={() => setVibeQuery(EMPTY_VIBE_QUERY)}
+            className="home-vibe-clear"
+            disabled={!hasVibeQuery}
+          >
+            Clear vibe
+          </button>
+        </div>
+        <PolarChart values={vibeQuery} onChange={setVibeQuery} onRelease={setVibeQuery} size={220} />
       </div>
 
       {locationError && sortMode !== "none" && (
@@ -215,46 +297,43 @@ export default function Home() {
       )}
 
       {loading && <p>Loading restaurants...</p>}
-      {!loading && visibleRestaurants.length === 0 && <p>No relevant results found.</p>}
+      {!loading && hasActiveQuery && visibleRestaurants.length === 0 && <p>No relevant results found.</p>}
+      {!loading && !hasActiveQuery && visibleRestaurants.length === 0 && <p>No restaurants available.</p>}
 
-      {visibleRestaurants.map((restaurant) => {
-        const distanceKm =
-          userLocation === null
-            ? null
-            : haversineKm(userLocation.lat, userLocation.lng, restaurant.lat, restaurant.lng);
+      {visibleRestaurants.length > 0 && (
+        <div className="restaurant-list-scroll" aria-label="Restaurant cards">
+          {visibleRestaurants.map((restaurant) => {
+            const distanceKm =
+              userLocation === null
+                ? null
+                : haversineKm(userLocation.lat, userLocation.lng, restaurant.lat, restaurant.lng);
 
-        const hasDistance = distanceKm !== null && Number.isFinite(distanceKm);
+            const hasDistance = distanceKm !== null && Number.isFinite(distanceKm);
 
-        return (
-          <div
-            key={restaurant.id}
-            onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                navigate(`/restaurant/${restaurant.id}`);
-              }
-            }}
-            style={{
-              padding: 15,
-              border: "1px solid #ddd",
-              borderRadius: 8,
-              marginBottom: 12,
-              cursor: "pointer",
-            }}
-          >
-            <h2 style={{ marginTop: 0 }}>{restaurant.restaurantName}</h2>
-            {restaurant.description && <p>{restaurant.description}</p>}
-            {restaurant.cuisine && <p style={{ margin: "4px 0" }}>Cuisine: {restaurant.cuisine}</p>}
-            {restaurant.address && (
-              <p style={{ fontStyle: "italic", margin: "4px 0" }}>{restaurant.address}</p>
-            )}
-            {hasDistance && <p style={{ opacity: 0.8, marginBottom: 0 }}>{distanceKm.toFixed(2)} km away</p>}
-          </div>
-        );
-      })}
+            return (
+              <div
+                key={restaurant.id}
+                onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigate(`/restaurant/${restaurant.id}`);
+                  }
+                }}
+                className="restaurant-card"
+              >
+                <h2>{restaurant.restaurantName}</h2>
+                {restaurant.description && <p>{restaurant.description}</p>}
+                {restaurant.cuisine && <p className="restaurant-cuisine">Cuisine: {restaurant.cuisine}</p>}
+                {restaurant.address && <p className="restaurant-address">{restaurant.address}</p>}
+                {hasDistance && <p className="restaurant-distance">{distanceKm.toFixed(2)} km away</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

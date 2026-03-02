@@ -17,19 +17,15 @@ export function Navbar() {
   }
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" role="navigation">
       <Link to="/" className="navbar-logo">
-          <img src={VouchLogo} alt="Logo"/>
+          <img src="../../public/assets/logos/VouchLogo.png"
+              width="205" 
+              height="77"
+              alt="Vouch logo"
+              fetchpriority="high"
+              decoding="async"/>
       </Link>
-      <form className="navbar-search" onSubmit={onSearch}>
-        <input
-          aria-label="Search restaurants"
-          placeholder="Search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <button type="submit">Search</button>
-      </form>
       <div className="navbar-right">
         {loading ? (
           <span className="navbar-user">…</span>

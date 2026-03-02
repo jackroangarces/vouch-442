@@ -15,10 +15,6 @@ import type { Restaurant } from "../../types/restaurant";
 import Toast from "../../components/Toast";
 import PolarChart from "../../components/PolarChart";
 import { useAuth } from "../../contexts/AuthContext";
-import {
-  getDummyRestaurantAggregateById,
-  getDummyRestaurantById,
-} from "../../data/dummyRestaurants";
 
 const ZERO_VIBE = [0, 0, 0, 0, 0, 0];
 
@@ -61,8 +57,6 @@ export default function RestaurantDetail() {
   const [restaurantReviewCount, setRestaurantReviewCount] = useState(0);
 
   async function loadRestaurantAggregate(restaurantId: string) {
-    const dummyAggregate = getDummyRestaurantAggregateById(restaurantId);
-
     const snap = await getDocs(
       query(collection(db, "reviews"), where("restaurantId", "==", restaurantId)),
     );
@@ -73,27 +67,6 @@ export default function RestaurantDetail() {
       const v = normalizeVibe(data.vibe);
       if (v) vibes.push(v);
     });
-
-    if (dummyAggregate) {
-      const baseVibe = normalizeVibe(dummyAggregate.vibe) ?? [...ZERO_VIBE];
-      const baseCount = Math.max(0, Math.floor(dummyAggregate.reviewCount));
-
-      if (baseCount === 0 && vibes.length === 0) {
-        setRestaurantReviewCount(0);
-        setRestaurantVibe([...ZERO_VIBE]);
-        return;
-      }
-
-      const sums = baseVibe.map((v) => v * baseCount);
-      for (const vibe of vibes) {
-        for (let i = 0; i < 6; i++) sums[i] += vibe[i];
-      }
-
-      const totalCount = baseCount + vibes.length;
-      setRestaurantReviewCount(totalCount);
-      setRestaurantVibe(sums.map((s) => Math.round((s / totalCount) * 10) / 10));
-      return;
-    }
 
     setRestaurantReviewCount(vibes.length);
     setRestaurantVibe(avgVibe(vibes));
@@ -107,15 +80,6 @@ export default function RestaurantDetail() {
     }
 
     const restaurantId = id;
-
-    // Fallback for local dummy restaurants used in homepage testing.
-    const dummy = getDummyRestaurantById(restaurantId);
-    if (dummy) {
-      setRestaurant({ id: dummy.id, restaurantName: dummy.restaurantName });
-      setLoading(false);
-      setError(null);
-      return;
-    }
 
     let cancelled = false;
 

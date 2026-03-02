@@ -111,10 +111,11 @@ body {
   padding: 2rem;
 }
 
-.home-controls {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 16px;
+.home-control-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .home-control-input {
@@ -1016,6 +1017,7 @@ button:focus-visible {
 .image-upload-btn:hover:not(:disabled) {
   background-color: #535bf2;
   border-color: #535bf2;
+  color: #000000;
 }
 .image-upload-row {
   display: flex;

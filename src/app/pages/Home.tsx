@@ -274,14 +274,21 @@ export default function Home() {
           className="home-control-input"
         />
 
+        <label htmlFor="sort-select" className="visually-hidden">
+          Sort restaurants
+        </label>
+
         <select
+          id="sort-select"
           value={sortMode}
-          onChange={(e) => setSortMode(e.target.value as SortMode)}
+          onChange={function (e) {
+            setSortMode(e.target.value);
+          }}
           className="home-control-input"
         >
-          <option value="none">Sort: None</option>
-          <option value="nearest">Sort: Nearest first</option>
-          <option value="farthest">Sort: Farthest first</option>
+          <option value="none">Sort by…</option>
+          <option value="nearest">Nearest first</option>
+          <option value="farthest">Farthest first</option>
         </select>
       </div>
 

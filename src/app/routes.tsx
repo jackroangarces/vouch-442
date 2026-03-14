@@ -5,12 +5,14 @@ import Profile from "./pages/Profile";
 import ProfileBusinesses from "./pages/ProfileBusinesses";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import Home from "./pages/Home";
+import HowItWorks from "./pages/HowItWorks";
 
 // React Router
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/profile" element={<Profile />} />

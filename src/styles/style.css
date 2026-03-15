@@ -55,9 +55,9 @@ body {
 }
 
 .navbar-logo img {
-  width: 50%;
+  width: 100%;
   max-width: 1000px;
-  height: 50%;
+  height: 100%;
   display: block;
 }
 
@@ -69,8 +69,8 @@ body {
   font-size: 0.95em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #646cff;
-  color: #fff;
+  background-color: #99A0F5;
+  color: #000000;
   cursor: pointer;
   transition: background-color 0.25s, border-color 0.25s;
   text-decoration: none;
@@ -109,12 +109,24 @@ body {
 }
 .navbar-search input {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.486);
   padding: 0.35rem 0.6rem;
   border-radius: 8px;
   color: inherit;
 }
-.navbar-search button { padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid transparent; background:#2a2a2a; color:#fff }
+.navbar-search button { padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid transparent; background:#99A0F5; color:#000000 }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 .home-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; align-items:start }
 .results { background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px }
@@ -130,6 +142,95 @@ body {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+.home-control-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.home-control-input {
+  width: 100%;
+  padding: 10px;
+}
+
+.home-vibe-filter {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.home-vibe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.home-vibe-header h3 {
+  margin: 0;
+}
+
+.home-vibe-clear {
+  padding: 0.45em 0.8em;
+}
+
+.restaurant-list-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.restaurant-card {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.restaurant-card:hover {
+  border-color: #646cff;
+  transform: translateY(-1px);
+}
+
+.restaurant-card:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+.restaurant-card h2 {
+  margin-top: 0;
+}
+
+.restaurant-card p {
+  margin: 4px 0;
+}
+
+.restaurant-cuisine {
+  font-weight: 500;
+}
+
+.restaurant-address {
+  font-style: italic;
+}
+
+.restaurant-distance {
+  opacity: 0.8;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .restaurant-list-scroll {
+    max-height: none;
+  }
 }
 
 .home-dummy-link {
@@ -171,15 +272,16 @@ body {
   max-width: 360px;
   margin: 2rem auto;
   padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid #000000;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: #000000;
 }
 
 .auth-card h1 {
   margin-top: 0;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
+  color:#ffff;
 }
 
 .auth-form {
@@ -192,6 +294,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  color:#ffff;
   font-size: 0.9rem;
 }
 
@@ -201,13 +304,13 @@ body {
   font-family: inherit;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background-color: #1a1a1a;
+  background-color: #525252;
   color: inherit;
 }
 
 .auth-form input:focus {
   outline: none;
-  border-color: #646cff;
+  border-color: #535bf2;
 }
 
 .auth-error {
@@ -222,13 +325,13 @@ body {
 .auth-submit {
   margin-top: 0.5rem;
   padding: 0.65em 1em;
-  background-color: #646cff;
-  color: #fff;
+  background-color: #535bf2;
+  color: #ffff;
   border: none;
 }
 
 .auth-submit:hover:not(:disabled) {
-  background-color: #535bf2;
+  background-color: #353ff0;
 }
 
 .auth-submit:disabled {
@@ -239,7 +342,7 @@ body {
 .auth-switch {
   margin: 1.25rem 0 0;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: #ffff;
 }
 
 .auth-switch a {
@@ -272,9 +375,9 @@ body {
 .navbar-logout {
   padding: 0.4em 0.75em;
   font-size: 0.9em;
-  background-color: #646cff;
-  color: #fff;
-  border: 1px solid #646cff;
+  background-color: #99A0F5;
+  color: #000000;
+  border: 1px solid #99A0F5;
 }
 
 .navbar-logout:hover {
@@ -332,8 +435,8 @@ button:focus-visible {
 
 .profile-settings-btn {
   padding: 0.6em 1.5em;
-  background-color: #646cff;
-  color: #fff;
+  background-color: #99A0F5;
+  color: #000000;
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -350,8 +453,8 @@ button:focus-visible {
   display: inline-block;
   padding: 0.6em 1.5em;
   background-color: transparent;
-  color: #646cff;
-  border: 1px solid #646cff;
+  color: #99A0F5;
+  border: 1px solid #99A0F5;
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 500;
@@ -376,6 +479,142 @@ button:focus-visible {
   margin: 0;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.55);
+}
+
+.profile-vibe-wrapper {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  min-width: 280px;
+  max-width: 600px;
+}
+
+.profile-vibe-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.profile-vibe-chart {
+  display: flex;  
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.profile-vibe-meta {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-favorites-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 0 0 1rem 0;
+}
+
+.profile-favorites-wrapper {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  min-width: 280px;
+  max-width: 600px;
+}
+
+.profile-favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.profile-favorite-card {
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.profile-favorite-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.profile-favorite-rating {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-favorites-empty,
+.profile-favorites-loading {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.profile-cuisines-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 0 0 1rem 0;
+}
+
+.profile-cuisines-wrapper {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  min-width: 280px;
+  max-width: 600px;
+}
+
+.profile-cuisines-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.profile-cuisine-card {
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.profile-cuisine-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.profile-cuisine-rating {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-cuisines-empty,
+.profile-cuisines-loading {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Modal */
@@ -700,6 +939,68 @@ button:focus-visible {
     border-color: #535bf2;
     color: #fff;
   }
+
+  .profile-vibe-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+
+  .profile-vibe-title {
+    color: #213547;
+  }
+
+  .profile-vibe-meta {
+    color: #6b7280;
+  }
+  
+/* Favorites */
+
+  .profile-favorites-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  
+  .profile-favorite-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+  }
+  
+  .profile-favorite-name {
+    color: #213547;
+  }
+  
+  .profile-favorite-rating {
+    color: #6b7280;
+  }
+  
+  .profile-favorites-empty,
+  .profile-favorites-loading {
+    color: #6b7280;
+  }
+  
+/* Top Cuisines */
+  .profile-cuisines-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  
+  .profile-cuisine-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+  }
+  
+  .profile-cuisine-name {
+    color: #213547;
+  }
+  
+  .profile-cuisine-rating {
+    color: #6b7280;
+  }
+  
+  .profile-cuisines-empty,
+  .profile-cuisines-loading {
+    color: #6b7280;
+  }
   
   .modal-section-label {
     color: #374151;
@@ -741,4 +1042,79 @@ button:focus-visible {
     color: #16a34a;
     background-color: rgba(22, 163, 74, 0.08);
   }
+}
+.image-upload-btn {
+  background-color: #646cff;
+  color: #646cff;
+  border: 1px solid #646cff;
+}
+
+.image-upload-btn:hover:not(:disabled) {
+  background-color: #535bf2;
+  border-color: #535bf2;
+  color: #000000;
+}
+.image-upload-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.image-upload-row input[type="url"] {
+  width: 100%;
+}
+
+.image-upload-btn {
+  align-self: flex-end;
+}
+
+.image-preview img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  margin-top: 8px;
+}
+
+.images-empty {
+  margin: 0;
+  opacity: 0.7;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.images-grid-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.images-remove {
+  margin-top: 8px;
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+
+.restaurant-gallery {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0 18px 0;
+}
+
+.restaurant-photo {
+  width: 220px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
 }

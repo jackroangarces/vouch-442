@@ -147,14 +147,6 @@ export default function RestaurantDetail() {
 
     const restaurantId = id;
 
-    // fallback
-    if (restaurantId === "dummy1") {
-      setRestaurant({ id: "dummy1", restaurantName: "Dummy Restaurant (for testing)" });
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
     let cancelled = false;
 
     async function fetchRestaurant() {
@@ -293,7 +285,7 @@ export default function RestaurantDetail() {
   if (loading) {
     return (
       <div className="main">
-        <p>Loading…</p>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -314,6 +306,16 @@ export default function RestaurantDetail() {
         <div style={{ flex: 1, minWidth: 280 }}>
           <h1>{restaurant.restaurantName}</h1>
 
+          <div className="restaurant-gallery">
+  {(restaurant.images?.length ?? 0) === 0 ? (
+    <img className="restaurant-photo" src="/assets/placeholder.png" alt="Restaurant" />
+  ) : (
+    restaurant.images!.map((img) => (
+      <img key={img.path} className="restaurant-photo" src={img.url} alt="Restaurant" />
+    ))
+  )}
+</div>
+          
           <button
             type="button"
             className="restaurant-review-btn"
@@ -356,7 +358,6 @@ export default function RestaurantDetail() {
           </p>
         </div>
       </div>
-
       {showReviewModal && (
         <div className="modal-overlay" onClick={() => setShowReviewModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -393,7 +394,7 @@ export default function RestaurantDetail() {
                         aria-pressed={starRating >= v}
                         onClick={() => setStarRating(v)}
                       >
-                        ★
+                        ?
                       </button>
                     );
                   })}

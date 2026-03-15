@@ -234,6 +234,45 @@ body {
   background-color: #535bf2;
 }
 
+.restaurant-detail-media {
+  margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.restaurant-detail-photo {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  object-fit: cover;
+}
+
+.restaurant-detail-meta {
+  margin-top: 0.75rem;
+}
+
+.restaurant-detail-cuisine {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.restaurant-detail-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
+.restaurant-detail-address {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
 /* Auth Pages */
 .auth-card {
   max-width: 360px;

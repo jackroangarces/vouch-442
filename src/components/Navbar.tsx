@@ -11,6 +11,12 @@ export function Navbar() {
   const location = useLocation();
   const { isBusiness } = useUserProfile();
   const [showAddBusiness, setShowAddBusiness] = useState(false);
+  const [q, setQ] = useState("");
+
+  function onSearch(e: { preventDefault(): void }) {
+    e.preventDefault();
+    navigate("/", { state: { search: q } });
+  }
 
   function openAddBusiness() {
     setShowAddBusiness(true);

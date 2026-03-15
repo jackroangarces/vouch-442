@@ -18,7 +18,7 @@ export default function Home() {
 
       <aside className="chart-area">
         <h3>Vibe Chart</h3>
-        <PolarChart values={vibe} onChange={setVibe} onRelease={reloadResults} />
+        <PolarChart values={vibe} onChange={setVibe} onRelease={reloadResults} showCategoryDescriptions />
       </aside>
     </div>
   )

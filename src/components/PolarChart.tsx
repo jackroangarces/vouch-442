@@ -1,13 +1,25 @@
 import React from 'react'
 
+// What low (1) vs high (5) means for each vibe category. Shown beside the chart when showCategoryDescriptions is true. */
+export const VIBE_CATEGORY_DESCRIPTIONS = [
+  { name: 'Food', low: 'Basic / forgettable', high: 'Exceptional / memorable' },
+  { name: 'Ambience', low: 'No atmosphere / generic', high: 'Distinct vibe / great mood' },
+  { name: 'Service', low: 'Slow or unhelpful', high: 'Attentive and smooth' },
+  { name: 'Price', low: 'Budget / cheap', high: 'Premium / splurge' },
+  { name: 'Sustainability', low: 'No visible effort', high: 'Eco-conscious / local' },
+  { name: 'Location', low: 'Out of the way / hard to get to', high: 'Convenient / easy to reach' },
+] as const
+
 type Props = {
   values?: number[]
   size?: number
   onChange?: (next: number[]) => void
   onRelease?: (final: number[]) => void
+  // When true, show a side panel explaining what low vs high means for each category. */
+  showCategoryDescriptions?: boolean
 }
 
-export default function PolarChart({ values, size = 260, onChange, onRelease }: Props) {
+export default function PolarChart({ values, size = 260, onChange, onRelease, showCategoryDescriptions }: Props) {
   const max = 5
   const axes = ['Food','Ambience','Service','Price','Sustainability','Location']
   const interactive = typeof onChange === 'function'
@@ -122,7 +134,7 @@ export default function PolarChart({ values, size = 260, onChange, onRelease }: 
     [onRelease],
   )
 
-  return (
+  const chart = (
     <div className="polar-wrap" style={{ width: size }}>
       <svg
         ref={svgRef}
@@ -219,4 +231,24 @@ export default function PolarChart({ values, size = 260, onChange, onRelease }: 
       </div>
     </div>
   )
+
+  if (showCategoryDescriptions) {
+    return (
+      <div className="polar-with-descriptions" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        {chart}
+        <div className="polar-descriptions" style={{ minWidth: 180, fontSize: 12, opacity: 0.9 }}>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>What the scores mean</div>
+          <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc' }}>
+            {VIBE_CATEGORY_DESCRIPTIONS.map(({ name, low, high }, i) => (
+              <li key={i} style={{ marginBottom: 6 }}>
+                <strong>{name}:</strong> Low = {low}. High = {high}.
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  return chart
 }

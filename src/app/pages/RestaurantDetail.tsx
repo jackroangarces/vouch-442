@@ -350,7 +350,7 @@ export default function RestaurantDetail() {
 
         <div style={{ width: 320, maxWidth: "100%" }}>
           <h3 style={{ marginTop: 0 }}>Restaurant Vibe</h3>
-          <PolarChart values={restaurantVibe} size={260} />
+          <PolarChart values={restaurantVibe} size={260} showCategoryDescriptions />
           <p style={{ margin: "8px 0 0", opacity: 0.7, fontSize: 13 }}>
             {restaurantReviewCount === 0
               ? "No reviews yet"
@@ -430,7 +430,7 @@ export default function RestaurantDetail() {
 
                 <div style={{ width: 220 }}>
                   <p style={{ margin: "0 0 6px 0" }}>Preview</p>
-                  <PolarChart values={userVibe} size={200} />
+                  <PolarChart values={userVibe} size={200} showCategoryDescriptions />
                 </div>
               </div>
             </div>

@@ -35,6 +35,20 @@ export function Navbar() {
               alt="Vouch logo"
               decoding="async"/>
       </Link>
+      <div className="navbar-center">
+        <form className="navbar-search" onSubmit={onSearch}>
+          <input
+            aria-label="Search restaurants"
+            placeholder="Search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <button type="submit">Search</button>
+        </form>
+        <Link to="/how-it-works" className="navbar-how-it-works">
+          How it works
+        </Link>
+      </div>
       <div className="navbar-right">
         {loading ? (
           <span className="navbar-user">…</span>

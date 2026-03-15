@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   collection,
   doc,
@@ -36,6 +36,7 @@ function avgVibe(vibes: number[][]): number[] {
 
 export default function RestaurantDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -238,8 +239,6 @@ export default function RestaurantDetail() {
     );
   }
 
-  const canReview = !!user && !hasReviewed;
-
   return (
     <div className="main">
       <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -249,8 +248,11 @@ export default function RestaurantDetail() {
           <button
             type="button"
             className="restaurant-review-btn"
-            disabled={!canReview}
-            onClick={() => setShowReviewModal(true)}
+            disabled={!!user && hasReviewed}
+            onClick={() => {
+              if (!user) navigate("/login");
+              else if (!hasReviewed) setShowReviewModal(true);
+            }}
           >
             {!user ? "Log in to review" : hasReviewed ? "Review submitted" : "Write a review"}
           </button>

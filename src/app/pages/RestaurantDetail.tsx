@@ -61,6 +61,7 @@ export default function RestaurantDetail() {
 
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const [reviewText, setReviewText] = useState("");
   const [starRating, setStarRating] = useState(0);
@@ -253,6 +254,9 @@ export default function RestaurantDetail() {
       if (existing.exists()) {
         setHasReviewed(true);
         setShowReviewModal(false);
+        // inform the user they already submitted one review for this restaurant
+        setToastMessage('You have already submitted a review for this restaurant. Only one review per user is allowed.');
+        setShowToast(true);
         return;
       }
 
@@ -270,6 +274,7 @@ export default function RestaurantDetail() {
 
       setHasReviewed(true);
       setShowReviewModal(false);
+      setToastMessage('Review submitted, Thank you!');
       setShowToast(true);
 
       setReviewText("");
@@ -324,6 +329,12 @@ export default function RestaurantDetail() {
           >
             {!user ? "Log in to review" : hasReviewed ? "Review submitted" : "Write a review"}
           </button>
+
+          {hasReviewed ? (
+            <p style={{ marginTop: 8, color: '#9ca3af', fontSize: 13 }}>
+              You have already submitted a review for this restaurant — one review per user.
+            </p>
+          ) : null}
 
           {latestReview && (latestReview.text || latestReview.rating != null) ? (
             <div

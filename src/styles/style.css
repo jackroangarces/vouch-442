@@ -267,6 +267,45 @@ body {
   background-color: #535bf2;
 }
 
+.restaurant-detail-media {
+  margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.restaurant-detail-photo {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  object-fit: cover;
+}
+
+.restaurant-detail-meta {
+  margin-top: 0.75rem;
+}
+
+.restaurant-detail-cuisine {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.restaurant-detail-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
+.restaurant-detail-address {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
 /* Auth Pages */
 .auth-card {
   max-width: 360px;
@@ -347,6 +386,51 @@ body {
 
 .auth-switch a {
   font-weight: 600;
+}
+
+.auth-forgot {
+  margin: 0.5rem 0 0;
+}
+
+.auth-forgot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-forgot-btn:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.auth-forgot-form {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.auth-forgot-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.auth-forgot-hint {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.auth-success {
+  margin: 0 0 0.5rem 0;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(200, 255, 200, 0.95);
+  background-color: rgba(0, 80, 0, 0.2);
+  border-radius: 6px;
 }
 
 .navbar-user {

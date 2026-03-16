@@ -3,7 +3,7 @@ import VouchLogo from "/assets/logos/VouchLogo.png";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserProfile } from "../contexts/UserProfileContext";
 import AddBusinessModal from "./AddBusinessModal";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
@@ -11,6 +11,13 @@ export function Navbar() {
   const location = useLocation();
   const { isBusiness } = useUserProfile();
   const [showAddBusiness, setShowAddBusiness] = useState(false);
+  const [q, setQ] = useState("");
+
+  function onSearch(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    // For now we just log the search text; wiring real search can come later.
+    console.log("search submit", q);
+  }
 
   function openAddBusiness() {
     setShowAddBusiness(true);

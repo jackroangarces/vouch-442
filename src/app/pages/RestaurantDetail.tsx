@@ -421,7 +421,7 @@ export default function RestaurantDetail() {
                         aria-pressed={starRating >= v}
                         onClick={() => setStarRating(v)}
                       >
-                        ?
+                        ★
                       </button>
                     );
                   })}

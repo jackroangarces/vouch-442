@@ -3,7 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
@@ -189,16 +189,40 @@ body {
 }
 
 .restaurant-card {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+  padding: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  color: white;
+
+  background-size: cover;
+  background-position: center;
+
+  min-height: 180px;
+}
+
+.restaurant-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.25),
+    rgba(0,0,0,0.75)
+  );
+
+  z-index: 1;
+}
+
+.restaurant-card * {
+  position: relative;
+  z-index: 2;
 }
 
 .restaurant-card:hover {
   border-color: #646cff;
-  transform: translateY(-1px);
+  transform: translateY(1px);
 }
 
 .restaurant-card:focus-visible {
@@ -497,6 +521,25 @@ button:focus-visible {
   padding: 3rem 1rem;
 }
 
+@media (max-width: 768px) {
+
+  .profile-page {
+    flex-direction: column;
+    align-items: stretch;   /* important */
+    gap: 2rem;
+  }
+
+  .profile-card,
+  .profile-vibe-wrapper,
+  .profile-favorites-wrapper,
+  .profile-cuisines-wrapper {
+    width: 100%;
+    max-width: 600px;
+    box-sizing: border-box;
+  }
+
+}
+
 .profile-card {
   display: flex;
   flex-direction: column;
@@ -506,7 +549,6 @@ button:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.03);
-  min-width: 280px;
 }
 
 .profile-avatar {
@@ -571,8 +613,6 @@ button:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.05);
-  min-width: 280px;
-  max-width: 600px;
 }
 
 .profile-vibe-title {
@@ -609,13 +649,14 @@ button:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.05);
-  min-width: 280px;
-  max-width: 600px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .profile-favorites-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 
@@ -625,6 +666,10 @@ button:focus-visible {
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.03);
   text-align: center;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-favorite-name {
@@ -662,13 +707,14 @@ button:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.05);
-  min-width: 280px;
-  max-width: 600px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .profile-cuisines-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 

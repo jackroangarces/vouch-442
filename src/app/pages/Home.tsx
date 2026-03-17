@@ -15,6 +15,7 @@ interface HomeRestaurant {
   lat: number;
   lng: number;
   vibe: number[] | null;
+  image?: string;
 }
 
 const EMPTY_VIBE_QUERY = [0, 0, 0, 0, 0, 0];
@@ -76,6 +77,7 @@ function mapRestaurantDoc(id: string, rawData: Record<string, unknown>): Omit<Ho
     cuisine: readString(rawData.cuisine),
     lat: readCoordinate(rawData, "lat"),
     lng: readCoordinate(rawData, "lng"),
+    image: readString(rawData.image),
   };
 }
 
@@ -335,6 +337,11 @@ export default function Home() {
                   }
                 }}
                 className="restaurant-card"
+                style={{
+                  backgroundImage: restaurant.image
+                  ? `url(${restaurant.image})`
+                  : undefined
+                }}
               >
                 <h2>{restaurant.restaurantName}</h2>
                 {restaurant.description && <p>{restaurant.description}</p>}

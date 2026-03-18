@@ -931,12 +931,37 @@ button:focus-visible {
 .modal-footer {
   padding: 0 1.25rem 1.25rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.75rem;
 }
+.modal-footer button {
+  min-width: 180px;
+  padding: 0.75em 1.25em;
+  height: 52px;
+  font-size: 1rem;
+}
+.modal-footer button {
+  flex: 1;
+  height: 52px;
+  font-size: 1rem;
+}
 
+.modal-footer .auth-submit {
+  margin-top: 0;
+}
 .modal-card-sm {
   max-width: 340px;
+}
+
+
+.modal-footer button {
+  width: 220px;
+  height: 56px;
+  font-size: 1rem;
+}
+
+.modal-footer .auth-submit {
+  margin-top: 0;
 }
 
 .delete-account-btn {
@@ -960,16 +985,236 @@ button:focus-visible {
   cursor: not-allowed;
 }
 
+/* Media Queries */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  .navbar {
+    background-color: #f5f5f5;
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+  .navbar-login,
+  .navbar-how-it-works {
+    background-color: #646cff;
+    color: #fff;
+  }
+  .navbar-login:hover,
+  .navbar-how-it-works:hover {
+    background-color: #535bf2;
+  }
+  button:not(.navbar-login):not(.navbar-logout):not(.restaurant-review-btn) {
+    background-color: #f9f9f9;
+  }
+  .navbar-search button:not(.navbar-login):not(.navbar-logout):not(.restaurant-review-btn) {
+    background-color: #646cff;
+    color: #fff;
+    border: 1px solid #646cff;
+  }
+  
+  .navbar-search button:not(.navbar-login):not(.navbar-logout):not(.restaurant-review-btn):hover {
+    background-color: #535bf2;
+    border-color: #535bf2;
+  }
+  
+  .modal-footer button:not(.navbar-login):not(.navbar-logout):not(.restaurant-review-btn) {
+    background-color: #646cff;
+    color: #fff;
+    border: 1px solid #646cff;
+  }
+  
+  .modal-footer button:not(.navbar-login):not(.navbar-logout):not(.restaurant-review-btn):hover:not(:disabled) {
+    background-color: #535bf2;
+    border-color: #535bf2;
+  }
+  
+  .modal-footer button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  
+  .auth-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #fafafa;
+  }
+  .auth-form input {
+    background-color: #fff;
+    border-color: rgba(0, 0, 0, 0.2);
+    color: #213547;
+  }
+  .auth-error {
+    color: #dc2626;
+    background-color: #fef2f2;
+  }
+  .navbar-profile {
+    color: #374151;
+  }
+  .navbar-profile:hover {
+    color: #646cff;
+  }
+  .navbar-logout {
+    background-color: #535bf2;
+    color: #fff;
+    border-color: #535bf2;
+  }
+  .navbar-logout:hover {
+    background-color: #3f46c8;
+    border-color: #3f46c8;
+  }
+  
+  .auth-switch {
+    color: #6b7280;
+  }
+  .profile-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #fafafa;
+  }
+  .profile-avatar {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  .profile-username {
+    color: #213547;
+  }
+  .profile-email {
+    color: #6b7280;
+  }
+  .profile-business-dashboard-btn {
+    background-color: #646cff;
+    color: #fff;
+    border: 1px solid #646cff;
+  }
+  
+  .profile-business-dashboard-btn:hover {
+    background-color: #535bf2;
+    border-color: #535bf2;
+    color: #fff;
+  }
+
+  .profile-vibe-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+
+  .profile-vibe-title {
+    color: #213547;
+  }
+
+  .profile-vibe-meta {
+    color: #6b7280;
+  }
+  
+/* Favorites */
+
+  .profile-favorites-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  
+  .profile-favorite-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+  }
+  
+  .profile-favorite-name {
+    color: #213547;
+  }
+  
+  .profile-favorite-rating {
+    color: #6b7280;
+  }
+  
+  .profile-favorites-empty,
+  .profile-favorites-loading {
+    color: #6b7280;
+  }
+  
+/* Top Cuisines */
+  .profile-cuisines-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  
+  .profile-cuisine-card {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+  }
+  
+  .profile-cuisine-name {
+    color: #213547;
+  }
+  
+  .profile-cuisine-rating {
+    color: #6b7280;
+  }
+  
+  .profile-cuisines-empty,
+  .profile-cuisines-loading {
+    color: #6b7280;
+  }
+  
+  .modal-section-label {
+    color: #374151;
+  }
+  .business-upgrade-btn {
+    background-color: #646cff;
+    color: #fff;
+    border: 1px solid #646cff;
+  }
+  
+  .business-upgrade-btn:hover:not(:disabled) {
+    background-color: #535bf2;
+    border-color: #535bf2;
+    color: #fff;
+  }
+
+  .modal-card {
+    background-color: #fff;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  .modal-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+  .modal-close {
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .modal-close:hover {
+    color: #213547;
+  }
+  .modal-body input {
+    background-color: #fff;
+    border-color: rgba(0, 0, 0, 0.2);
+    color: #213547;
+  }
+  .modal-divider {
+    border-top-color: rgba(0, 0, 0, 0.08);
+  }
+  .modal-success {
+    color: #16a34a;
+    background-color: rgba(22, 163, 74, 0.08);
+  }
+}
 .image-upload-btn {
   background-color: #646cff;
-  color: #646cff;
+  color: #fff;
   border: 1px solid #646cff;
+  align-self: flex-end;
 }
 
 .image-upload-btn:hover:not(:disabled) {
   background-color: #535bf2;
   border-color: #535bf2;
-  color: #000000;
+  color: #fff;
+}
+
+.image-upload-btn:hover:not(:disabled) {
+  background-color: #535bf2;
+  border-color: #535bf2;
+  color: #fff;
 }
 .image-upload-row {
   display: flex;
@@ -982,9 +1227,7 @@ button:focus-visible {
   width: 100%;
 }
 
-.image-upload-btn {
-  align-self: flex-end;
-}
+
 
 .image-preview img {
   width: 100%;
@@ -1033,5 +1276,56 @@ button:focus-visible {
   height: 140px;
   object-fit: cover;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.business-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.business-card {
+  max-width: 420px;            /* prevents full-page giant cards */
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+}
+
+.business-card-img {
+  width: 100%;
+  height: 180px;               /* forces consistent height */
+  object-fit: cover;           /* crops instead of stretching */
+  display: block;
+}
+
+.business-card-body {
+  padding: 12px;
+}
+
+.business-card-title {
+  font-weight: 700;
+}
+
+.business-card-sub {
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.business-card-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.business-link {
+  color: #99A0F5;
+  text-decoration: none;
+}
+
+.business-link:hover {
+  text-decoration: underline;
 }

@@ -25,7 +25,7 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
+  const { isBusiness, upgradeToBusiness } = useUserProfile();
   function resetError() {
     setError("");
   }
@@ -54,18 +54,18 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
   async function createOrUpdateBusiness(restaurantId: string, name: string, loc: string, desc: string) {
     if (!user) throw new Error("Not logged in");
-
+  
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.exists() ? (userSnap.data() as { isBusiness?: unknown }) : null;
-
-    if (userData?.isBusiness !== true) {
-      throw new Error("Only business accounts can create restaurants.");
-    }
-
+  
     const batch = writeBatch(db);
-
+  
+    batch.set(
+      userRef,
+      { isBusiness: true },
+      { merge: true },
+    );
+  
     batch.set(
       restaurantRef,
       {
@@ -77,16 +77,7 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
       },
       { merge: true },
     );
-
-    batch.set(
-      userRef,
-      {
-        restaurantId,
-        restaurantName: name,
-      },
-      { merge: true },
-    );
-
+  
     await batch.commit();
   }
 
@@ -112,11 +103,14 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
     const validated = validateInputs();
     if (!validated) return;
 
-    const restaurantId = user.uid;
-
+    const restaurantId = isBusiness ? `${user.uid}_${Date.now()}` : user.uid;
     setSaving(true);
     try {
       await createOrUpdateBusiness(restaurantId, validated.name, validated.loc, validated.desc);
+      
+      await upgradeToBusiness();
+      onSuccess?.(restaurantId);
+      onClose();
 
       onSuccess?.(restaurantId);
       onClose();

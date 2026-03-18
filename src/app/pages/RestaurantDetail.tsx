@@ -311,14 +311,23 @@ export default function RestaurantDetail() {
           <h1>{restaurant.restaurantName}</h1>
 
           <div className="restaurant-gallery">
-            {(restaurant.images?.length ?? 0) === 0 ? (
-              <img className="restaurant-photo" src="/assets/placeholder.png" alt="Restaurant" />
-            ) : (
-              restaurant.images!.map((img) => (
-                <img key={img.path} className="restaurant-photo" src={img.url} alt="Restaurant" />
-              ))
-            )}
-          </div>
+  {(restaurant.images?.length ?? 0) === 0 ? (
+    <img
+      className="restaurant-photo"
+      src="/assets/placeholder.png"
+      alt={`${restaurant.restaurantName} placeholder photo`}
+    />
+  ) : (
+    restaurant.images!.map((img) => (
+      <img
+        key={img.path}
+        className="restaurant-photo"
+        src={img.url}
+        alt={`${restaurant.restaurantName} photo`}
+      />
+    ))
+  )}
+</div>
 
           {(restaurant.cuisine ?? restaurant.description ?? restaurant.address) && (
             <div className="restaurant-detail-meta">

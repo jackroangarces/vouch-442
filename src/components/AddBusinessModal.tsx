@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
+import { useUserProfile } from "../contexts/UserProfileContext";
+import { doc, writeBatch, serverTimestamp } from "firebase/firestore";
 
 type Props = {
   onClose: () => void;
@@ -23,7 +24,7 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
+  const { isBusiness, upgradeToBusiness } = useUserProfile();
   function resetError() {
     setError("");
   }
@@ -52,11 +53,19 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
   async function createOrUpdateBusiness(restaurantId: string, name: string, loc: string, desc: string) {
     if (!user) throw new Error("Not logged in");
-
+  
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const userRef = doc(db, "users", user.uid);
-
-    await setDoc(
+  
+    const batch = writeBatch(db);
+  
+    batch.set(
+      userRef,
+      { isBusiness: true },
+      { merge: true },
+    );
+  
+    batch.set(
       restaurantRef,
       {
         restaurantName: name,
@@ -67,16 +76,8 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
       },
       { merge: true },
     );
-
-    await setDoc(
-      userRef,
-      {
-        isBusiness: true,
-        restaurantId,
-        restaurantName: name,
-      },
-      { merge: true },
-    );
+  
+    await batch.commit();
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -91,11 +92,14 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
     const validated = validateInputs();
     if (!validated) return;
 
-    const restaurantId = user.uid;
-
+    const restaurantId = isBusiness ? `${user.uid}_${Date.now()}` : user.uid;
     setSaving(true);
     try {
       await createOrUpdateBusiness(restaurantId, validated.name, validated.loc, validated.desc);
+      
+      await upgradeToBusiness();
+      onSuccess?.(restaurantId);
+      onClose();
 
       onSuccess?.(restaurantId);
       onClose();

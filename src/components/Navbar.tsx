@@ -15,7 +15,6 @@ export function Navbar() {
 
   function onSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // For now we just log the search text; wiring real search can come later.
     console.log("search submit", q);
   }
 
@@ -64,11 +63,9 @@ export function Navbar() {
             <button type="button" className="navbar-profile" onClick={() => navigate("/profile")}>
             {user.displayName || user.email}
             </button>
-            {isBusiness === false && (
-  <button type="button" className="navbar-add-business" onClick={openAddBusiness}>
-    Add A Business
-  </button>
-)}
+            <button type="button" className="navbar-add-business" onClick={openAddBusiness}>
+  {isBusiness ? "Add Another Business" : "Add A Business"}
+</button>
             <button type="button" className="navbar-logout" onClick={async () => {
               await logout();
               if (location.pathname === "/profile") navigate("/");

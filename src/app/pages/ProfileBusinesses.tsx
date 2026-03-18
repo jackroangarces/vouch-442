@@ -116,7 +116,7 @@ export default function ProfileBusinesses() {
                 <img className="business-card-img" src={cover} alt={b.restaurantName} />
                 <div className="business-card-body">
                   <div className="business-card-title">{b.restaurantName}</div>
-                  <div className="business-card-sub">{b.location || ""}</div>
+                  <div className="business-card-sub">{b.address || ""}</div>
 
                   <div className="business-card-actions">
                     <button type="button" className="business-upgrade-btn" onClick={() => openImages(b.id)}>

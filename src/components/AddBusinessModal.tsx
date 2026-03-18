@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { doc, getDoc, serverTimestamp, writeBatch } from "firebase/firestore";
+import { doc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserProfile } from "../contexts/UserProfileContext";
@@ -17,42 +17,63 @@ function isValidRestaurantName(name: string) {
 
 export default function AddBusinessModal({ onClose, onSuccess }: Props) {
   const { user } = useAuth();
-  const { isBusiness, profileLoading } = useUserProfile();
+  const { isBusiness, profileLoading, upgradeToBusiness } = useUserProfile();
 
   const [restaurantName, setRestaurantName] = useState("");
-  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [description, setDescription] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const { isBusiness, upgradeToBusiness } = useUserProfile();
   function resetError() {
     setError("");
   }
 
   function validateInputs() {
     const name = restaurantName.trim();
-    const loc = location.trim();
+    const addr = address.trim();
+    const latNum = Number.parseFloat(lat);
+    const lngNum = Number.parseFloat(lng);
 
     if (!isValidRestaurantName(name)) {
-      alert("Invalid Restaurant Name");
       setError("Invalid Restaurant Name");
       return null;
     }
 
-    if (!loc) {
-      setError("Location is required");
+    if (!addr) {
+      setError("Address is required");
+      return null;
+    }
+
+    if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) {
+      setError("Latitude must be a number between -90 and 90");
+      return null;
+    }
+
+    if (!Number.isFinite(lngNum) || lngNum < -180 || lngNum > 180) {
+      setError("Longitude must be a number between -180 and 180");
       return null;
     }
 
     return {
       name,
-      loc,
+      address: addr,
+      lat: latNum,
+      lng: lngNum,
       desc: description.trim(),
     };
   }
 
-  async function createOrUpdateBusiness(restaurantId: string, name: string, loc: string, desc: string) {
+  async function createOrUpdateBusiness(
+    restaurantId: string,
+    name: string,
+    addressValue: string,
+    latValue: number,
+    lngValue: number,
+    desc: string,
+  ) {
     if (!user) throw new Error("Not logged in");
   
     const restaurantRef = doc(db, "restaurants", restaurantId);
@@ -70,7 +91,9 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
       restaurantRef,
       {
         restaurantName: name,
-        location: loc,
+        address: addressValue,
+        lat: latValue,
+        lng: lngValue,
         description: desc,
         ownerId: user.uid,
         createdAt: serverTimestamp(),
@@ -106,12 +129,16 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
     const restaurantId = isBusiness ? `${user.uid}_${Date.now()}` : user.uid;
     setSaving(true);
     try {
-      await createOrUpdateBusiness(restaurantId, validated.name, validated.loc, validated.desc);
+      await createOrUpdateBusiness(
+        restaurantId,
+        validated.name,
+        validated.address,
+        validated.lat,
+        validated.lng,
+        validated.desc,
+      );
       
       await upgradeToBusiness();
-      onSuccess?.(restaurantId);
-      onClose();
-
       onSuccess?.(restaurantId);
       onClose();
     } catch (err) {
@@ -155,11 +182,37 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
           </label>
 
           <label>
-            Location
+            Address
             <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Ex: Seattle, WA"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Ex: 123 Main St, Seattle, WA"
+              onFocus={resetError}
+            />
+          </label>
+
+          <label>
+            Latitude
+            <input
+              type="number"
+              inputMode="decimal"
+              step="any"
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              placeholder="Ex: 47.6062"
+              onFocus={resetError}
+            />
+          </label>
+
+          <label>
+            Longitude
+            <input
+              type="number"
+              inputMode="decimal"
+              step="any"
+              value={lng}
+              onChange={(e) => setLng(e.target.value)}
+              placeholder="Ex: -122.3321"
               onFocus={resetError}
             />
           </label>
@@ -188,7 +241,9 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
                 profileLoading ||
                 !isBusiness ||
                 !restaurantName.trim() ||
-                !location.trim()
+                !address.trim() ||
+                !lat.trim() ||
+                !lng.trim()
               }
             >
               {saving ? "Creating..." : "Create Business"}

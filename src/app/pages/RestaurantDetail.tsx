@@ -17,7 +17,6 @@ import type { Restaurant } from "../../types/restaurant";
 import Toast from "../../components/Toast";
 import PolarChart from "../../components/PolarChart";
 import { useAuth } from "../../contexts/AuthContext";
-import { getRestaurantImageAlt } from "../../utils/restaurantImages";
 
 const ZERO_VIBE = [0, 0, 0, 0, 0, 0];
 

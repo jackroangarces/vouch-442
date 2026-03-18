@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { RestaurantImage } from "../types/restaurant";
+import { getRestaurantImageAlt } from "../utils/restaurantImages";
 
 type Props = {
   restaurantId: string;
@@ -160,7 +161,7 @@ export default function RestaurantImagesModal({ restaurantId, onClose }: Props) 
             <div className="images-grid">
               {images.map((img) => (
                 <div key={img.path} className="images-grid-item">
-                  <img src={img.url} alt="Restaurant" />
+                  <img src={img.url} alt={getRestaurantImageAlt("restaurant", img)} />
                   <button type="button" className="images-remove" onClick={() => void removeImage(img)}>
                     Remove
                   </button>

@@ -88,7 +88,8 @@ export default function PolarChart({ values, size = 260, onChange, onRelease, sh
       const proj = dx * ux + dy * uy
       const clamped = Math.max(0, Math.min(r, proj))
       const raw = (clamped / r) * max
-      const q = Math.max(1, Math.min(max, Math.round(raw)))
+      // Allow dragging all the way back to the center so filters can reset to zero.
+      const q = Math.max(0, Math.min(max, Math.round(raw)))
 
       const next = latestRef.current.slice()
       next[axis] = q

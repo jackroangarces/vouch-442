@@ -17,6 +17,7 @@ import type { Restaurant } from "../../types/restaurant";
 import Toast from "../../components/Toast";
 import PolarChart from "../../components/PolarChart";
 import { useAuth } from "../../contexts/AuthContext";
+import { getRestaurantImageAlt } from "../../utils/restaurantImages";
 
 const ZERO_VIBE = [0, 0, 0, 0, 0, 0];
 
@@ -312,10 +313,19 @@ export default function RestaurantDetail() {
 
           <div className="restaurant-gallery">
             {(restaurant.images?.length ?? 0) === 0 ? (
-              <img className="restaurant-photo" src="/assets/placeholder.png" alt="Restaurant" />
+              <img
+                className="restaurant-photo"
+                src="/assets/placeholder.png"
+                alt={getRestaurantImageAlt(restaurant.restaurantName)}
+              />
             ) : (
-              restaurant.images!.map((img) => (
-                <img key={img.path} className="restaurant-photo" src={img.url} alt="Restaurant" />
+              restaurant.images!.map((img, index) => (
+                <img
+                  key={img.path}
+                  className="restaurant-photo"
+                  src={img.url}
+                  alt={getRestaurantImageAlt(restaurant.restaurantName, img, index)}
+                />
               ))
             )}
           </div>
@@ -477,7 +487,7 @@ export default function RestaurantDetail() {
       )}
 
       <Toast
-        message="Review submitted, Thank you!"
+        message={toastMessage}
         visible={showToast}
         onClose={() => setShowToast(false)}
         duration={2000}

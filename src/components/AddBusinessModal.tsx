@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
+import { useUserProfile } from "../contexts/UserProfileContext";
 
 type Props = {
   onClose: () => void;
@@ -11,11 +12,12 @@ type Props = {
 function isValidRestaurantName(name: string) {
   const trimmed = name.trim();
   if (trimmed.length < 2 || trimmed.length > 60) return false;
-  return /^[A-Za-z0-9][A-Za-z0-9 &'’.-]*$/.test(trimmed);
+  return /^[A-Za-z0-9][A-Za-z0-9 &'.-\u2019]*$/.test(trimmed);
 }
 
 export default function AddBusinessModal({ onClose, onSuccess }: Props) {
   const { user } = useAuth();
+  const { isBusiness, profileLoading } = useUserProfile();
 
   const [restaurantName, setRestaurantName] = useState("");
   const [location, setLocation] = useState("");
@@ -55,8 +57,16 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.exists() ? (userSnap.data() as { isBusiness?: unknown }) : null;
 
-    await setDoc(
+    if (userData?.isBusiness !== true) {
+      throw new Error("Only business accounts can create restaurants.");
+    }
+
+    const batch = writeBatch(db);
+
+    batch.set(
       restaurantRef,
       {
         restaurantName: name,
@@ -68,15 +78,16 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
       { merge: true },
     );
 
-    await setDoc(
+    batch.set(
       userRef,
       {
-        isBusiness: true,
         restaurantId,
         restaurantName: name,
       },
       { merge: true },
     );
+
+    await batch.commit();
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -85,6 +96,16 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
     if (!user) {
       setError("Please log in.");
+      return;
+    }
+
+    if (profileLoading) {
+      setError("Checking account permissions...");
+      return;
+    }
+
+    if (!isBusiness) {
+      setError("Only business accounts can create restaurants. Switch your account type in settings first.");
       return;
     }
 
@@ -101,7 +122,11 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Something went wrong");
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Something went wrong",
+      );
     } finally {
       setSaving(false);
     }
@@ -119,6 +144,11 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
 
         <form className="modal-body" onSubmit={handleSubmit}>
           {error && <p className="auth-error">{error}</p>}
+          {!profileLoading && !isBusiness && (
+            <p className="auth-error">
+              Only business accounts can create restaurants. Switch your account type in settings first.
+            </p>
+          )}
 
           <label>
             Restaurant Name
@@ -159,9 +189,15 @@ export default function AddBusinessModal({ onClose, onSuccess }: Props) {
             <button
               type="submit"
               className="auth-submit"
-              disabled={saving || !restaurantName.trim() || !location.trim()}
+              disabled={
+                saving ||
+                profileLoading ||
+                !isBusiness ||
+                !restaurantName.trim() ||
+                !location.trim()
+              }
             >
-              {saving ? "Creating…" : "Create Business"}
+              {saving ? "Creating..." : "Create Business"}
             </button>
           </div>
         </form>

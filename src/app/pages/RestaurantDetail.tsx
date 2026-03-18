@@ -477,7 +477,7 @@ export default function RestaurantDetail() {
       )}
 
       <Toast
-        message="Review submitted, Thank you!"
+        message={toastMessage}
         visible={showToast}
         onClose={() => setShowToast(false)}
         duration={2000}

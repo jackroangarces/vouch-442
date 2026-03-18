@@ -3,7 +3,8 @@ import VouchLogo from "/assets/logos/VouchLogo.png";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserProfile } from "../contexts/UserProfileContext";
 import AddBusinessModal from "./AddBusinessModal";
-import { useState, FormEvent } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();

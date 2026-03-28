@@ -1,15 +1,3 @@
-Artyom Serebryakov - Dev
-Jack Garces - Dev
-Sid Tewari - Dev
-Matthew Zhuo - Prod
-Veer Shah - PM
-
-Competencies
-  Everyone: Open to others' ideas, Staying on top of deadlines, Communicating with team
-  Product Designer: Identify user pain points, Strong vision and creative direction
-  Project Manager: Reminding everyone of deadlines, Strong time management and being assertive
-  Developer: Clean code and wrapping things in functions for later use, Providing documentation
-
 
 Problem statement:
 
